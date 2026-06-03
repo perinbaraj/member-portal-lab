@@ -45,7 +45,7 @@ From the task list, assign tasks to independent lanes:
 
 | Lane | Owner | Tasks | Files Owned |
 |---|---|---|---|
-| **Lane A: API Implementation** | Developer 1 | T-001 through T-005 | `src/routes/appointments.ts`, `src/services/scheduling-service.ts` |
+| **Lane A: API Implementation** | Developer 1 | T-001 through T-005 | `server/routes/appointments.ts`, `server/services/scheduling-service.ts` |
 | **Lane B: Tests** | Developer 2 | T-006 through T-009 | `tests/appointments.test.ts`, test fixtures |
 | **Lane C: Validation + Docs** | Developer 3 | T-010 through T-012 | Zod schemas, API docs, error catalog |
 
@@ -61,7 +61,7 @@ Define the interface contract between Lane A (implementation) and Lane B (tests)
 - Status codes for each scenario
 ```
 
-**Expected output:** A shared `types/appointments.ts` interface file that all lanes import.
+**Expected output:** A shared `server/types.ts` interface file (add the `Appointment` interface) that all lanes import.
 
 ### Step 4: Execute Lanes in Parallel
 
@@ -70,19 +70,19 @@ Each lane runs independently. If working solo, run sequentially with strict file
 **Lane A prompt:**
 
 ```
-/speckit.implement Implement only the appointment API routes (tasks T-001 through T-005). Create src/routes/appointments.ts and src/services/scheduling-service.ts. Do not create test files. Follow the type contracts in types/appointments.ts.
+/speckit.implement Implement only the appointment API routes (tasks T-001 through T-005). Create server/routes/appointments.ts and server/services/scheduling-service.ts. Do not create test files. Follow the type contracts in server/types.ts.
 ```
 
 **Lane B prompt:**
 
 ```
-Write tests for the appointment scheduling API based on the acceptance scenarios in spec.md. Test file: tests/appointments.test.ts. Use the type contracts in types/appointments.ts. Do not implement the routes — import them from src/routes/appointments.ts (they will be provided by Lane A).
+Write tests for the appointment scheduling API based on the acceptance scenarios in spec.md. Test file: tests/appointments.test.ts. Use the type contracts in server/types.ts. Do not implement the routes — import them from server/routes/appointments.ts (they will be provided by Lane A).
 ```
 
 **Lane C prompt:**
 
 ```
-Create Zod validation schemas for all appointment API request bodies based on spec.md. File: src/schemas/appointments.ts. Also create an error catalog documenting all error codes and messages for the appointment feature. File: docs/appointment-errors.md.
+Create Zod validation schemas for all appointment API request bodies based on spec.md. File: server/schemas/appointments.ts. Also create an error catalog documenting all error codes and messages for the appointment feature. File: docs/appointment-errors.md.
 ```
 
 ### Step 5: Merge in Planned Order

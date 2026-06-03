@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
+import helmet from "helmet";
 import path from "path";
 import { getMember, getClaimsForMember, getClaim, getActivePrescriptions } from "./data.js";
 import "./types.js";
@@ -7,6 +8,7 @@ import "./types.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 

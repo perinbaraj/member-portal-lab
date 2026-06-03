@@ -11,7 +11,7 @@ This is a full-stack healthcare member portal with a Node.js + Express BFF backe
 - **Language:** TypeScript (strict mode)
 - **Auth:** OIDC session via existing member-portal identity provider (stubbed in labs with `x-member-id` header)
 - **Downstream services:** pharmacy-service, claims-service, scheduling-service (REST APIs, OAuth 2.0)
-- **Cache:** Redis for idempotency keys and session data
+- **Cache:** Redis for idempotency keys and session data (ioredis installed; wired per-route in labs)
 
 **Frontend (SPA):**
 - **Framework:** React 18 with TypeScript
@@ -35,12 +35,12 @@ This is a full-stack healthcare member portal with a Node.js + Express BFF backe
 - All responses include security headers via Helmet
 
 ### Code Style
-- **Backend:** One route file per domain (members, claims, prescriptions, appointments)
-- Service layer abstracts external API calls
+- **Backend:** Target pattern is one route file per domain (members, claims, prescriptions, appointments). The starter code begins with a monolithic `server/server.ts` — labs progressively refactor into `server/routes/` files.
+- Service layer abstracts external API calls (create under `server/services/`)
 - All async operations use try/catch with typed error handling
 - Tests required for happy path + auth failure + edge cases per endpoint
 - **Frontend:** One component file per feature (MemberProfile, PrescriptionsList, etc.)
-- Centralized API service layer (`src/services/api.ts`) for all HTTP calls
+- Centralized API service layer (`src/services/httpClient.ts`) for all HTTP calls
 - All API methods use typed fetch wrappers matching backend response shapes
 - Components use React hooks (useState, useEffect) for state and side effects
 - CSS co-located with components or in global `App.css` with CSS variables

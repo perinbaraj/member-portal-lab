@@ -36,7 +36,7 @@ specify --version
 
 | Module | Session | Format | Output |
 |---|---|---|---|
-| Module 1 | Kickoff, environment checks, objectives | Instructor-led | Confirmed tool readiness and starter-code running |
+| Module 1 | Kickoff, environment checks, objectives | Instructor-led | Confirmed tool readiness and `npm run dev` running |
 | Module 2 | Lab 1: Spec Kit + Copilot — Prescription Refill | Hands-on | Constitution + spec + PR for P1 slice |
 | Module 3 | Lab 2: Spec-Driven Dev — Prior Authorization | Hands-on | Spec-grounded implementation with traceability |
 | Module 4 | Lab 3: Role-Based Agents — Multi-Perspective Review | Hands-on | 4 agent personas + merged findings |

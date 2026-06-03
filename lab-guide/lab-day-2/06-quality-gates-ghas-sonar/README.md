@@ -13,6 +13,12 @@ Integrate GitHub Advanced Security (GHAS) code scanning and quality checks into 
 - GitHub repository with GHAS enabled (or ability to enable it)
 - Copilot Chat available
 
+> **Setup Note:** This lab requires pushing to a GitHub remote. If you haven't already, create a GitHub repository and add it as a remote:
+> ```bash
+> git remote add origin https://github.com/<your-org>/member-portal-lab.git
+> ```
+> The `npm run lint` script exists in `package.json` but ESLint is **not yet installed** — configuring it is part of this lab (Step 2).
+
 ## Step-by-step Instructions
 
 ### Step 1: Create a Branch with Intentional Issues

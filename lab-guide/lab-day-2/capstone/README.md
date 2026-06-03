@@ -59,8 +59,8 @@ specify init benefits-eligibility --integration copilot
 
 | Lane | Owner | Scope | Files |
 |---|---|---|---|
-| A: API + Service | Driver | Routes, service layer, types | `src/routes/eligibility.ts`, `src/services/benefits-service.ts` |
-| B: Frontend Component | Frontend Owner | React component, API integration, styling | `src/components/EligibilityChecker.tsx`, `src/services/api.ts` (update) |
+| A: API + Service | Driver | Routes, service layer, types | `server/routes/eligibility.ts`, `server/services/benefits-service.ts` |
+| B: Frontend Component | Frontend Owner | React component, API integration, styling | `src/components/EligibilityChecker.tsx`, `src/services/httpClient.ts` (update) |
 | C: Tests + Validation | QA | Unit tests (backend + frontend), integration tests | `tests/eligibility.test.ts`, component tests |
 | D: Security + Governance | Security/Compliance | Auth checks, PHI audit, governance record, a11y review | Security/HIPAA review, a11y audit |
 
@@ -81,9 +81,9 @@ Task: Implement GET /api/eligibility/check endpoint and POST /api/eligibility/se
 
 Spec Reference: User Story 1 (check by procedure code) and User Story 2 (search by keyword).
 
-Target Files: src/routes/eligibility.ts, src/services/benefits-service.ts
+Target Files: server/routes/eligibility.ts, server/services/benefits-service.ts
 
-Existing Pattern: Follow src/routes/prescriptions.ts for route structure.
+Existing Pattern: Follow the prescriptions route pattern in server/server.ts for route structure.
 
 Type Contracts: Import from types/eligibility.ts (defined in lane contracts).
 
@@ -101,15 +101,15 @@ Non-Goals: No real benefits API call (use stub data).
 Use context pack template from Lab 5:
 
 ```
-Task: Create EligibilityChecker React component in ../../starter-code/frontend/src/components/EligibilityChecker.tsx
+Task: Create EligibilityChecker React component in src/components/EligibilityChecker.tsx
 
 Spec Reference: User Story 1 (search and display) and User Story 2 (result formatting).
 
-Target Files: frontend/src/components/EligibilityChecker.tsx, frontend/src/services/api.ts
+Target Files: src/components/EligibilityChecker.tsx, src/services/httpClient.ts
 
-Existing Pattern: Follow frontend/src/components/PrescriptionsList.tsx for structure.
+Existing Pattern: Follow src/components/PrescriptionsList.tsx for structure.
 
-Type Contracts: Import EligibilityRequest, EligibilityResponse types from ../starter-code/src/types/eligibility.ts
+Type Contracts: Import EligibilityRequest, EligibilityResponse types from src/types.ts
 
 Component Features: Form for procedure search, loading state, results display (coverage status, cost, auth requirement), error handling, WCAG 2.1 AA accessibility.
 
@@ -165,7 +165,7 @@ File: frontend/src/components/__tests__/EligibilityChecker.test.tsx
 Run the security reviewer and HIPAA compliance agents from Lab 3:
 
 ```
-@workspace /security-reviewer Review src/routes/eligibility.ts and src/services/benefits-service.ts
+@workspace /security-reviewer Review server/routes/eligibility.ts and server/services/benefits-service.ts
 ```
 
 ```
@@ -192,8 +192,8 @@ Follow merge order: **D → A → B → C** (schemas/docs first, backend impleme
 
 After each merge:
 ```bash
-cd starter-code && npm run typecheck && npm test
-cd frontend && npm run type-check
+npm run typecheck
+npm test
 ```
 
 Resolve any conflicts using the spec as source of truth.
@@ -202,24 +202,16 @@ Resolve any conflicts using the spec as source of truth.
 
 #### Step 12: Run Full Quality Checks
 
-**Backend:**
+**All checks:**
 ```bash
-cd starter-code
 npm run lint
 npm run typecheck
 npm test
 ```
 
-**Frontend:**
-```bash
-cd frontend
-npm run lint
-npm run type-check
-```
-
 **Combined PR:**
 ```bash
-git add starter-code/
+git add .
 git commit -m "feat: benefits eligibility checker (capstone, full-stack)"
 git push -u origin capstone-benefits-eligibility
 gh pr create --title "feat: benefits eligibility checker (full-stack)" --body "Capstone delivery - backend API + React UI"

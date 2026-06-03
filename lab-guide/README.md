@@ -77,7 +77,7 @@ All labs follow the [GitHub Spec Kit](https://github.com/github/spec-kit) method
 
 - Complete all exit criteria before moving to the next lab
 - Commit artifacts to your branch at logical checkpoints
-- Use the starter-code Copilot instructions for consistent HIPAA-compliant output
+- Use the repo's `.github/copilot-instructions.md` for consistent HIPAA-compliant output
 - Demo working evidence: commands, PR checks, reports — not just narrative
 
 ### Recommended Team Setup
@@ -195,9 +195,9 @@ Complete this checklist before starting labs. Mark blockers immediately.
    git --no-pager status
    ```
 3. Keep this lab pack available locally for reference:
-   - `optum-madhuri-2026\starter-code`
-   - `optum-madhuri-2026\lab-day-1`
-   - `optum-madhuri-2026\lab-day-2`
+   - `member-portal-lab/` (the repo root)
+   - `member-portal-lab/lab-guide/lab-day-1`
+   - `member-portal-lab/lab-guide/lab-day-2`
 
 ### 4) Copilot and Spec Kit Validation
 

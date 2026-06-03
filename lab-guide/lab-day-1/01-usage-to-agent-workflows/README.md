@@ -4,7 +4,7 @@
 
 Use GitHub Spec Kit with GitHub Copilot to convert a healthcare backlog item into a shippable PR through the **Constitution → Specify → Plan → Tasks → Implement** workflow, delivering **both a backend API and a React frontend UI component**.
 
-**Use Case:** Build a prescription refill feature in the Optum member portal so members can view active prescriptions and request refills without calling the pharmacy. The feature includes a backend API endpoint and a React component in the frontend portal.
+**Use Case:** Build a prescription refill feature in the member portal so members can view active prescriptions and request refills without calling the pharmacy. The feature includes a backend API endpoint and a React component in the frontend portal.
 
 ## Prerequisites
 
@@ -92,7 +92,7 @@ Copilot asks targeted questions about anything marked `[NEEDS CLARIFICATION]`. A
 In Copilot Chat:
 
 ```
-/speckit.plan Full-stack: React 18 + TypeScript for the UI (in ../../starter-code/frontend/src). Node.js + Express for the BFF (in ../../starter-code/src). Read prescription data from internal pharmacy-service REST API (OAuth 2.0). Submit refill requests via POST to pharmacy-service /refills. Use Redis for short-term refill-request idempotency. Frontend calls BFF with x-member-id header. Follow the constitution for both layers.
+/speckit.plan Full-stack: React 18 + TypeScript for the UI (in src/). Node.js + Express for the BFF (in server/). Read prescription data from internal pharmacy-service REST API (OAuth 2.0). Submit refill requests via POST to pharmacy-service /refills. Use Redis for short-term refill-request idempotency. Frontend calls BFF with x-member-id header. Follow the constitution for both layers.
 ```
 
 **Expected output:** `.specify/specs/001-prescription-refill/plan.md` with:
@@ -125,7 +125,7 @@ In Copilot Chat:
 
 ### Frontend
 - [ ] T-004: Create PrescriptionsList React component
-- [ ] T-005: Implement API service call (src/services/api.ts) for GET /api/prescriptions
+- [ ] T-005: Implement API service call (src/services/httpClient.ts) for GET /api/prescriptions
 - [ ] T-006: Add loading and error states to component
 - [ ] T-007: Add WCAG 2.1 AA accessibility labels to list items
 - [ ] T-008: Test component with mock API responses
@@ -160,13 +160,13 @@ Fix any gaps, contradictions, or coverage holes before implementing.
 Scope to **User Story 1 (P1) only** — viewing active prescriptions on both backend and frontend. This is your first shippable slice.
 
 **Backend Implementation:**
-- Create `src/routes/prescriptions.ts` with GET endpoint
+- Add the POST /api/prescriptions/:id/refill route to `server/server.ts` (or create `server/routes/prescriptions.ts`)
 - Implement prescription service with mock data
 - Add tests
 
 **Frontend Implementation:**
 - Create `src/components/PrescriptionsList.tsx` React component
-- Update `src/services/api.ts` with getPrescriptions() method
+- Update `src/services/httpClient.ts` with getPrescriptions() method
 - Add loading and error states
 - Style with accessibility in mind
 
@@ -176,22 +176,12 @@ If Copilot drifts, re-anchor:
 
 ### Step 9: Validate
 
-**Backend:**
 ```bash
-cd starter-code
 npm test
 npm run typecheck
-npm run lint
 ```
 
-**Frontend:**
-```bash
-cd starter-code/frontend
-npm run type-check
-npm run lint
-```
-
-All checks must pass for both layers in the P1 slice.
+All checks must pass for the P1 slice.
 
 ### Step 10: Open the PR
 
@@ -200,7 +190,7 @@ Create separate PRs or one full-stack PR:
 **Option 1 (Recommended):** One full-stack PR
 ```bash
 git checkout -b 001-prescription-refill
-git add starter-code/
+git add .
 git commit -m "feat: view active prescriptions (US1 P1 slice, full-stack)"
 git push -u origin 001-prescription-refill
 ```
@@ -209,13 +199,13 @@ git push -u origin 001-prescription-refill
 ```bash
 # Backend PR
 git checkout -b 001-prescription-refill-backend
-git add starter-code/
+git add server/
 git commit -m "feat(backend): view active prescriptions endpoint"
 git push -u origin 001-prescription-refill-backend
 
 # Frontend PR
 git checkout -b 001-prescription-refill-frontend
-git add frontend/
+git add src/
 git commit -m "feat(frontend): prescription list component"
 git push -u origin 001-prescription-refill-frontend
 ```
@@ -236,7 +226,7 @@ Draft a full-stack PR description. Include: 1) which user story this slice ships
 - [ ] Frontend: PrescriptionsList component renders and calls the API
 - [ ] A PR is open with code and tests for both layers
 - [ ] PR description lists covered acceptance scenarios and explicitly calls out which layer ships which feature
-- [ ] `npm test` and `npm run typecheck` pass in both `starter-code/` and `frontend/`
+- [ ] `npm test` and `npm run typecheck` pass from the repo root
 
 ## Time Budget
 

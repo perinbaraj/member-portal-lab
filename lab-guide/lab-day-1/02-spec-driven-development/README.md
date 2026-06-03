@@ -70,15 +70,15 @@ Answer each, confirm spec updates.
 **Expected plan sections:**
 
 **Backend:**
-- New route file: `src/routes/prior-auth.ts`
-- New service file: `src/services/prior-auth-service.ts`
+- New route file: `server/routes/prior-auth.ts`
+- New service file: `server/services/prior-auth-service.ts`
 - Zod validation schemas for request body
 - Status transition state machine
 - Error handling pattern
 
 **Frontend:**
 - New React component: `src/components/PriorAuthForm.tsx`
-- API service integration in `src/services/api.ts`
+- API service integration in `src/services/httpClient.ts`
 - Form with procedure code input, submit button, status display
 - Error and success state messaging
 

@@ -9,9 +9,9 @@ Improve Copilot output quality by engineering precise context packs — sending 
 ## Prerequisites
 
 - Completion of Labs 1–4
-- Working starter-code with multiple implemented features
+- Working member portal with multiple implemented features
 - Copilot Chat in VS Code
-- `.github/copilot-instructions.md` file in starter-code
+- `.github/copilot-instructions.md` file in the repo
 
 ## Step-by-step Instructions
 
@@ -39,7 +39,7 @@ What makes a prompt produce good healthcare code? The signals are:
 | Signal | Example | Why |
 |---|---|---|
 | Spec reference | "Per FR-003 in spec.md..." | Grounds output in requirements |
-| File paths | "In src/routes/claims.ts..." | Eliminates guessing about structure |
+| File paths | "In server/server.ts..." | Eliminates guessing about structure |
 | Type definitions | "Use the Claim interface from types/index.ts" | Prevents invented types |
 | Constitution rules | "Follow HIPAA rules: no PHI in logs" | Enforces compliance |
 | Existing patterns | "Follow the pattern in prescriptions.ts" | Ensures consistency |
@@ -57,9 +57,9 @@ Create a reusable template:
 
 **Spec Reference:** [link to spec section or acceptance scenario]
 
-**Target File:** [exact path, e.g., src/routes/claims.ts]
+**Target File:** [exact path, e.g., server/server.ts or server/routes/claims.ts]
 
-**Existing Pattern:** [reference file to follow, e.g., src/routes/prescriptions.ts]
+**Existing Pattern:** [reference file to follow, e.g., the prescriptions route in server/server.ts]
 
 **Type Contracts:** [import from types/index.ts — list relevant interfaces]
 
@@ -83,11 +83,11 @@ Task: Add a POST /api/claims/:claimId/appeal endpoint that lets a member submit 
 
 Spec Reference: The member provides a reason (string, max 1000 chars) and optional supporting document reference. Only denied claims can be appealed. A claim can only be appealed once.
 
-Target File: src/routes/claims.ts (add to existing route file)
+Target File: server/server.ts (add to existing claims routes, or create server/routes/claims.ts)
 
-Existing Pattern: Follow the pattern in src/routes/prescriptions.ts for route structure, error handling, and response format.
+Existing Pattern: Follow the pattern of the prescriptions route in server/server.ts for route structure, error handling, and response format.
 
-Type Contracts: Use the Claim interface from src/types/index.ts. Add an Appeal interface with: appealId, claimId, memberId, reason, status (submitted/in_review/decided), submittedAt.
+Type Contracts: Use the Claim interface from server/types.ts. Add an Appeal interface with: appealId, claimId, memberId, reason, status (submitted/in_review/decided), submittedAt.
 
 Constitution Rules:
 - No PHI in log statements

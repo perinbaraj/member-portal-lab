@@ -30,6 +30,8 @@ export const httpClient = {
     return data.prescriptions || [];
   },
 
+  // NOTE: This endpoint is implemented by participants in Lab 1.
+  // The backend route (POST /api/prescriptions/:id/refill) does not exist yet.
   async refillPrescription(id: string): Promise<{ success: boolean }> {
     const res = await fetch(`${API_BASE}/prescriptions/${id}/refill`, {
       method: 'POST',
