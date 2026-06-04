@@ -92,7 +92,7 @@ All labs follow the [GitHub Spec Kit](https://github.com/github/spec-kit) method
 | Day | Directory | Labs | Healthcare Use Cases |
 |---|---|---|---|
 | Day 1 | [lab-day-1/](lab-day-1/) | Labs 1–4 | Prescription refill, prior auth, appointments |
-| Day 2 | [lab-day-2/](lab-day-2/) | Labs 5–8 | Context engineering, quality gates, AI governance, benefits eligibility |
+| Day 2 | [lab-day-2/](lab-day-2/) | Labs 5–8 | Context engineering, quality gates, Codex Workflow, benefits eligibility |
 
 ---
 
