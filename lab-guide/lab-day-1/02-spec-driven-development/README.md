@@ -19,10 +19,19 @@ Use the Spec Kit workflow to specify, plan, and implement a prior authorization 
 
 ## Step-by-step Instructions
 
-### Step 1: Initialize the Feature
+### Step 1: Confirm Spec Kit in This Repo
 
 ```bash
-specify init prior-authorization --integration copilot
+cd member-portal-lab
+specify --version
+```
+
+Use the existing starter repository as the working directory for this lab. Do not create a separate feature folder.
+
+If this repo was not initialized in Lab 1, run once from the repo root:
+
+```bash
+specify init --integration copilot
 ```
 
 ### Step 2: Establish Principles (or Reuse Lab 1 Constitution)

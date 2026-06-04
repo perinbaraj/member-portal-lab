@@ -32,10 +32,11 @@ Reference: [github.com/github/spec-kit](https://github.com/github/spec-kit)
 ### Step 1: Initialize the Project with Copilot Integration
 
 ```bash
-specify init prescription-refill --integration copilot
-cd prescription-refill
-code .
+cd member-portal-lab
+specify init --integration copilot
 ```
+
+Run this from the existing starter repository root so Spec Kit artifacts are created in this same project. If prompted for target location, choose the current directory (`.`).
 
 Spec Kit scaffolds:
 - `.specify/` — configuration and per-feature artifact folders
@@ -160,15 +161,17 @@ Fix any gaps, contradictions, or coverage holes before implementing.
 Scope to **User Story 1 (P1) only** — viewing active prescriptions on both backend and frontend. This is your first shippable slice.
 
 **Backend Implementation:**
-- Add the POST /api/prescriptions/:id/refill route to `server/server.ts` (or create `server/routes/prescriptions.ts`)
-- Implement prescription service with mock data
-- Add tests
+- Confirm/implement `GET /api/prescriptions` with member-context isolation in `server/server.ts` (or `server/routes/prescriptions.ts`)
+- Implement/update prescription service data flow as needed
+- Add tests for happy path, unauthorized access, and empty state
 
 **Frontend Implementation:**
-- Create `src/components/PrescriptionsList.tsx` React component
-- Update `src/services/httpClient.ts` with getPrescriptions() method
+- Create/update `src/components/PrescriptionsList.tsx` React component
+- Update `src/services/httpClient.ts` with `getPrescriptions()` method
 - Add loading and error states
 - Style with accessibility in mind
+
+Do **not** implement refill mutation (`POST /api/prescriptions/:id/refill`) in this step; that belongs to a later user story.
 
 If Copilot drifts, re-anchor:
 
