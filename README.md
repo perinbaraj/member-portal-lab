@@ -5,7 +5,6 @@ A lean healthcare member portal (Express API + React frontend) used as the base 
 ## Quick Start
 
 ```bash
-cd starter-code
 npm install
 npm run dev
 ```
