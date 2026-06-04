@@ -1,6 +1,6 @@
-# Optum Madhuri 2026 — GitHub Copilot Pre-Hack Lab Pack
+# GitHub Copilot Pre-Hack Lab Pack
 
-Hands-on lab pack for the Optum Madhuri 2026 pre-hack. Two days of structured GitHub Copilot exercises using a full-stack healthcare member portal, covering Spec Kit workflows, role-based agents, quality gates, and responsible AI governance.
+Hands-on lab pack for the pre-hack. Two days of structured GitHub Copilot exercises using a full-stack healthcare member portal, covering Spec Kit workflows, role-based agents, quality gates, and responsible AI governance.
 
 > **Instructions + starter code included.** All labs use the same member portal codebase with both backend (Node.js + Express) and frontend (React 18 + TypeScript) in the root directory.
 
