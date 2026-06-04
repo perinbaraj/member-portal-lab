@@ -14,7 +14,24 @@ export interface Prescription {
   dosage: string;
   lastFilledDate: string;
   refillsRemaining: number;
-  status: "active" | "expired" | "discontinued";
+  prescriptionStatus: "active" | "expired" | "discontinued";
+  refillStatus: "eligible" | "pending" | "processing" | "ineligible";
+  refillStatusReason:
+    | "REFILL_AVAILABLE"
+    | "NO_REFILLS_REMAINING"
+    | "ALREADY_PENDING"
+    | "ALREADY_PROCESSING"
+    | "PRESCRIPTION_INACTIVE"
+    | null;
+  pendingRefillRequestedAt: string | null;
+}
+
+export interface RefillMutationResult {
+  success: boolean;
+  refillStatus: "pending" | "eligible";
+  message: string;
+  code: string | null;
+  duplicate: boolean | null;
 }
 
 export interface Claim {

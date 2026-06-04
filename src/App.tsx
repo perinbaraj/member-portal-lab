@@ -9,7 +9,7 @@ type View = 'profile' | 'prescriptions' | 'claims';
 
 export const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('profile');
-  const [memberId, setMemberIdInput] = useState<string>('M-10001');
+  const [memberId, setMemberIdInput] = useState<string>(() => localStorage.getItem('memberId') || 'M-10001');
   const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   const handleSetMemberId = (id: string) => {
@@ -68,7 +68,9 @@ export const App: React.FC = () => {
               ))}
             </div>
             <div className="custom-input">
+              <label htmlFor="member-id-input">Custom member ID</label>
               <input
+                id="member-id-input"
                 type="text"
                 placeholder="Or enter custom member ID"
                 defaultValue={memberId}

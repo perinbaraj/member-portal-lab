@@ -29,6 +29,8 @@ All `/api/*` routes require the `x-member-id` header.
 curl -H "x-member-id: M-10001" http://localhost:3000/api/members/me
 curl -H "x-member-id: M-10001" http://localhost:3000/api/claims
 curl -H "x-member-id: M-10001" http://localhost:3000/api/prescriptions
+curl -X POST -H "x-member-id: M-10001" http://localhost:3000/api/prescriptions/RX-70001/refill
+curl -X DELETE -H "x-member-id: M-10001" http://localhost:3000/api/prescriptions/RX-70002/refill
 ```
 
 ## Scripts
@@ -40,6 +42,7 @@ curl -H "x-member-id: M-10001" http://localhost:3000/api/prescriptions
 | `npm run dev:ui` | Frontend only |
 | `npm run build` | Compile backend + build frontend |
 | `npm test` | Run API tests |
+| `npm run test:ui` | Run UI interaction tests |
 
 ## Project Structure
 

@@ -1,0 +1,222 @@
+openapi: 3.1.0
+info:
+  title: Member Portal Prescriptions Contract
+  version: 1.0.0
+  description: |
+    BFF contract for viewing active prescriptions, requesting a refill, and canceling a
+    pending refill. All routes require member authentication through the existing portal
+    member context.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/prescriptions:
+    get:
+      summary: List active prescriptions for the authenticated member
+      operationId: listPrescriptions
+      parameters:
+        - in: header
+          name: x-member-id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Active prescriptions returned for the authenticated member
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - prescriptions
+                properties:
+                  prescriptions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PrescriptionView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /api/prescriptions/{prescriptionId}/refill:
+    post:
+      summary: Submit a refill request for an eligible prescription
+      operationId: requestRefill
+      parameters:
+        - $ref: '#/components/parameters/PrescriptionId'
+        - in: header
+          name: x-member-id
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: Refill request accepted or duplicate request collapsed safely
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefillMutationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Refill cannot be submitted because the refill is already processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Refill cannot be submitted because the prescription is not eligible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    delete:
+      summary: Cancel the current pending refill for a prescription
+      operationId: cancelPendingRefill
+      parameters:
+        - $ref: '#/components/parameters/PrescriptionId'
+        - in: header
+          name: x-member-id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pending refill canceled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefillMutationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Cancellation failed because the refill already entered processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Cancellation failed because no pending refill exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+components:
+  parameters:
+    PrescriptionId:
+      in: path
+      name: prescriptionId
+      required: true
+      schema:
+        type: string
+  responses:
+    Unauthorized:
+      description: Missing or invalid member context
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Authenticated member attempted to access another member's prescription data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Prescription not found for the authenticated member
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: Downstream service unavailable or timed out
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    PrescriptionView:
+      type: object
+      required:
+        - prescriptionId
+        - medicationName
+        - dosage
+        - lastFilledDate
+        - refillsRemaining
+        - prescriptionStatus
+        - refillStatus
+      properties:
+        prescriptionId:
+          type: string
+        medicationName:
+          type: string
+        dosage:
+          type: string
+        lastFilledDate:
+          type: string
+        refillsRemaining:
+          type: integer
+          minimum: 0
+        prescriptionStatus:
+          type: string
+          enum: [active, expired, discontinued]
+        refillStatus:
+          type: string
+          enum: [eligible, pending, processing, ineligible]
+        refillStatusReason:
+          type:
+            - string
+            - 'null'
+        pendingRefillRequestedAt:
+          type:
+            - string
+            - 'null'
+    RefillMutationResponse:
+      type: object
+      required:
+        - success
+        - refillStatus
+        - message
+      properties:
+        success:
+          type: boolean
+        refillStatus:
+          type: string
+          enum: [pending, eligible]
+        message:
+          type: string
+        code:
+          type:
+            - string
+            - 'null'
+        duplicate:
+          type:
+            - boolean
+            - 'null'
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type:
+            - string
+            - 'null'

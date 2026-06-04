@@ -57,3 +57,9 @@ This is a full-stack healthcare member portal with a Node.js + Express BFF backe
 - Color contrasts must meet AA standards
 - Form inputs must have associated `<label>` elements
 - Error messages must be announced to screen readers
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+at specs/001-manage-refills/plan.md
+<!-- SPECKIT END -->

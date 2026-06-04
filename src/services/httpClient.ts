@@ -1,4 +1,4 @@
-import type { Member, Prescription, Claim } from '../types';
+import type { Member, Prescription, Claim, RefillMutationResult } from '../types';
 
 const API_BASE = '/api';
 
@@ -12,8 +12,8 @@ function headers(): HeadersInit {
 
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error(err.error || `API error: ${res.status}`);
+    const err = await res.json().catch(() => ({ message: 'Unknown error' }));
+    throw new Error(err.message || 'We could not process your request.');
   }
   return res.json();
 }
@@ -30,14 +30,20 @@ export const httpClient = {
     return data.prescriptions || [];
   },
 
-  // NOTE: This endpoint is implemented by participants in Lab 1.
-  // The backend route (POST /api/prescriptions/:id/refill) does not exist yet.
-  async refillPrescription(id: string): Promise<{ success: boolean }> {
+  async refillPrescription(id: string): Promise<RefillMutationResult> {
     const res = await fetch(`${API_BASE}/prescriptions/${id}/refill`, {
       method: 'POST',
       headers: headers(),
     });
-    return handleResponse<{ success: boolean }>(res);
+    return handleResponse<RefillMutationResult>(res);
+  },
+
+  async cancelRefillPrescription(id: string): Promise<RefillMutationResult> {
+    const res = await fetch(`${API_BASE}/prescriptions/${id}/refill`, {
+      method: 'DELETE',
+      headers: headers(),
+    });
+    return handleResponse<RefillMutationResult>(res);
   },
 
   async getClaims(): Promise<Claim[]> {
