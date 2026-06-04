@@ -33,7 +33,7 @@ Reference: [github.com/github/spec-kit](https://github.com/github/spec-kit)
 
 ```bash
 cd member-portal-lab
-specify init --integration copilot
+specify init . --integration copilot
 ```
 
 Run this from the existing starter repository root so Spec Kit artifacts are created in this same project. If prompted for target location, choose the current directory (`.`).
