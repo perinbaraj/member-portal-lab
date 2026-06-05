@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { MemberProfile } from './components/MemberProfile';
 import { PrescriptionsList } from './components/PrescriptionsList';
 import { ClaimsList } from './components/ClaimsList';
+import { PriorAuthForm } from './components/PriorAuthForm';
 import { httpClient } from './services/httpClient';
 import './App.css';
 
-type View = 'profile' | 'prescriptions' | 'claims';
+type View = 'profile' | 'prescriptions' | 'claims' | 'prior-auth';
 
 export const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('profile');
-  const [memberId, setMemberIdInput] = useState<string>('M-10001');
+  const [memberId, setMemberIdInput] = useState<string>(() => localStorage.getItem('memberId') || 'M-10001');
   const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   const handleSetMemberId = (id: string) => {
@@ -43,6 +44,12 @@ export const App: React.FC = () => {
             Claims
           </button>
           <button
+            className={`nav-button ${currentView === 'prior-auth' ? 'active' : ''}`}
+            onClick={() => setCurrentView('prior-auth')}
+          >
+            Prior Auth
+          </button>
+          <button
             className="nav-button auth-button"
             onClick={() => setShowAuthDialog(!showAuthDialog)}
           >
@@ -68,7 +75,9 @@ export const App: React.FC = () => {
               ))}
             </div>
             <div className="custom-input">
+              <label htmlFor="member-id-input">Custom member ID</label>
               <input
+                id="member-id-input"
                 type="text"
                 placeholder="Or enter custom member ID"
                 defaultValue={memberId}
@@ -90,6 +99,7 @@ export const App: React.FC = () => {
         {currentView === 'profile' && <MemberProfile />}
         {currentView === 'prescriptions' && <PrescriptionsList />}
         {currentView === 'claims' && <ClaimsList />}
+        {currentView === 'prior-auth' && <PriorAuthForm />}
       </main>
 
       <footer className="app-footer">

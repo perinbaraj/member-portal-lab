@@ -2,7 +2,9 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import path from "path";
-import { getMember, getClaimsForMember, getClaim, getActivePrescriptions } from "./data.js";
+import { getMember, getClaimsForMember, getClaim } from "./data.js";
+import { prescriptionsRouter } from "./routes/prescriptions.js";
+import { priorAuthRouter } from "./routes/priorAuth.js";
 import "./types.js";
 
 const app = express();
@@ -27,8 +29,7 @@ function authMiddleware(req: Request, res: Response, next: NextFunction): void {
   if (!memberId) {
     res.status(401).json({
       error: "Unauthorized",
-      message: "Missing x-member-id header.",
-      hint: "Send x-member-id header (e.g. M-10001) or set DEV_MEMBER_ID env var.",
+      message: "Missing member context.",
     });
     return;
   }
@@ -67,11 +68,8 @@ app.get("/api/claims/:claimId", (req: Request, res: Response) => {
   res.json(claim);
 });
 
-// GET /api/prescriptions
-app.get("/api/prescriptions", (req: Request, res: Response) => {
-  const prescriptions = getActivePrescriptions(req.auth!.memberId);
-  res.json({ prescriptions });
-});
+app.use("/api/prescriptions", prescriptionsRouter);
+app.use("/api/prior-auth", priorAuthRouter);
 
 // TODO: POST /api/prescriptions/:id/refill — Lab exercise
 // TODO: POST /api/claims/:claimId/appeal — Lab exercise
