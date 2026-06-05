@@ -5,6 +5,13 @@ import {
   RefillRequest,
   RefillMutationResult,
   AppError,
+  PriorAuthorizationRequest,
+  StatusTransitionAuditEvent,
+  PriorAuthStatus,
+  PriorAuthActorType,
+  CreatePriorAuthRequestInput,
+  PriorAuthListResponse,
+  DenialReasonCode,
 } from "./types.js";
 
 // ─── Mock Data ───────────────────────────────────────────────────────────────
@@ -166,6 +173,138 @@ const REFILL_REQUESTS: RefillRequest[] = [
     updatedAt: "2026-06-04T09:35:00.000Z",
     canceledAt: null,
     downstreamReference: "DSP-10002",
+  },
+];
+
+const PRIOR_AUTH_REQUESTS: PriorAuthorizationRequest[] = [
+  {
+    requestId: "PAR-10001",
+    memberId: "M-10001",
+    procedureCode: "27447",
+    referringProvider: "Dr. Alvarez",
+    clinicalJustification: "Persistent knee pain with severe osteoarthritis and failed conservative management.",
+    preferredFacility: "Central Ortho Center",
+    status: "pending",
+    denialReasonCode: null,
+    denialReason: null,
+    appealInstructions: null,
+    createdAt: "2026-06-04T08:00:00.000Z",
+    updatedAt: "2026-06-04T08:00:00.000Z",
+  },
+  {
+    requestId: "PAR-10002",
+    memberId: "M-10001",
+    procedureCode: "29881",
+    referringProvider: "Dr. Alvarez",
+    clinicalJustification: "Meniscal injury with persistent instability after physical therapy.",
+    preferredFacility: "Central Ortho Center",
+    status: "denied",
+    denialReasonCode: "medical_necessity",
+    denialReason: "The submitted documentation does not currently support medical necessity criteria.",
+    appealInstructions: "Please contact member services to review appeal options and required documents.",
+    createdAt: "2026-06-03T10:00:00.000Z",
+    updatedAt: "2026-06-03T14:00:00.000Z",
+  },
+  {
+    requestId: "PAR-20001",
+    memberId: "M-10002",
+    procedureCode: "72148",
+    referringProvider: "Dr. Li",
+    clinicalJustification: "Lumbar pain with neurologic symptoms and failed conservative treatment.",
+    preferredFacility: "North Imaging Center",
+    status: "approved",
+    denialReasonCode: null,
+    denialReason: null,
+    appealInstructions: null,
+    createdAt: "2026-06-02T09:00:00.000Z",
+    updatedAt: "2026-06-02T16:00:00.000Z",
+  },
+  {
+    requestId: "PAR-30001",
+    memberId: "M-10003",
+    procedureCode: "73721",
+    referringProvider: "Dr. Singh",
+    clinicalJustification: "Persistent ankle instability following trauma.",
+    preferredFacility: "South Diagnostic Pavilion",
+    status: "expired",
+    denialReasonCode: null,
+    denialReason: null,
+    appealInstructions: null,
+    createdAt: "2026-05-01T09:00:00.000Z",
+    updatedAt: "2026-06-01T09:00:00.000Z",
+  },
+];
+
+const PRIOR_AUTH_AUDIT_EVENTS: StatusTransitionAuditEvent[] = [
+  {
+    eventId: "PAE-10001",
+    requestId: "PAR-10001",
+    memberId: "M-10001",
+    actorType: "member",
+    fromStatus: null,
+    toStatus: "pending",
+    occurredAt: "2026-06-04T08:00:00.000Z",
+    reasonCode: null,
+  },
+  {
+    eventId: "PAE-10002",
+    requestId: "PAR-10002",
+    memberId: "M-10001",
+    actorType: "member",
+    fromStatus: null,
+    toStatus: "pending",
+    occurredAt: "2026-06-03T10:00:00.000Z",
+    reasonCode: null,
+  },
+  {
+    eventId: "PAE-10003",
+    requestId: "PAR-10002",
+    memberId: "M-10001",
+    actorType: "reviewer",
+    fromStatus: "pending",
+    toStatus: "denied",
+    occurredAt: "2026-06-03T14:00:00.000Z",
+    reasonCode: "medical_necessity",
+  },
+  {
+    eventId: "PAE-20001",
+    requestId: "PAR-20001",
+    memberId: "M-10002",
+    actorType: "member",
+    fromStatus: null,
+    toStatus: "pending",
+    occurredAt: "2026-06-02T09:00:00.000Z",
+    reasonCode: null,
+  },
+  {
+    eventId: "PAE-20002",
+    requestId: "PAR-20001",
+    memberId: "M-10002",
+    actorType: "reviewer",
+    fromStatus: "pending",
+    toStatus: "approved",
+    occurredAt: "2026-06-02T16:00:00.000Z",
+    reasonCode: null,
+  },
+  {
+    eventId: "PAE-30001",
+    requestId: "PAR-30001",
+    memberId: "M-10003",
+    actorType: "member",
+    fromStatus: null,
+    toStatus: "pending",
+    occurredAt: "2026-05-01T09:00:00.000Z",
+    reasonCode: null,
+  },
+  {
+    eventId: "PAE-30002",
+    requestId: "PAR-30001",
+    memberId: "M-10003",
+    actorType: "system",
+    fromStatus: "pending",
+    toStatus: "expired",
+    occurredAt: "2026-06-01T09:00:00.000Z",
+    reasonCode: "auto_expiry",
   },
 ];
 
@@ -356,4 +495,136 @@ export function cancelRefill(
     code: "REFILL_CANCELED",
     duplicate: false,
   };
+}
+
+function toIsoNow(): string {
+  return new Date().toISOString();
+}
+
+function buildPriorAuthRequestId(): string {
+  return `PAR-${Date.now()}`;
+}
+
+function buildPriorAuthEventId(): string {
+  return `PAE-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+}
+
+export function listPriorAuthRequests(
+  memberId: string,
+  page = 1,
+  limit = 20
+): PriorAuthListResponse {
+  const memberRequests = PRIOR_AUTH_REQUESTS
+    .filter((request) => request.memberId === memberId)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+
+  const safePage = page < 1 ? 1 : page;
+  const safeLimit = limit < 1 ? 20 : limit > 100 ? 100 : limit;
+  const start = (safePage - 1) * safeLimit;
+  const requests = memberRequests.slice(start, start + safeLimit);
+
+  return {
+    requests,
+    page: safePage,
+    limit: safeLimit,
+    total: memberRequests.length,
+  };
+}
+
+export function getPriorAuthRequest(
+  requestId: string,
+  memberId: string
+): PriorAuthorizationRequest | undefined {
+  return PRIOR_AUTH_REQUESTS.find(
+    (request) => request.requestId === requestId && request.memberId === memberId
+  );
+}
+
+export function getPriorAuthRequestById(
+  requestId: string
+): PriorAuthorizationRequest | undefined {
+  return PRIOR_AUTH_REQUESTS.find((request) => request.requestId === requestId);
+}
+
+export function createPriorAuthRequest(
+  memberId: string,
+  input: CreatePriorAuthRequestInput
+): PriorAuthorizationRequest {
+  const now = toIsoNow();
+  const request: PriorAuthorizationRequest = {
+    requestId: buildPriorAuthRequestId(),
+    memberId,
+    procedureCode: input.procedureCode,
+    referringProvider: input.referringProvider,
+    clinicalJustification: input.clinicalJustification,
+    preferredFacility: input.preferredFacility,
+    status: "pending",
+    denialReasonCode: null,
+    denialReason: null,
+    appealInstructions: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  PRIOR_AUTH_REQUESTS.push(request);
+  appendPriorAuthTransitionEvent(request.requestId, memberId, null, "pending", "member", null);
+  return request;
+}
+
+export function updatePriorAuthStatus(
+  requestId: string,
+  memberId: string,
+  toStatus: PriorAuthStatus,
+  actorType: PriorAuthActorType,
+  reasonCode: string | null = null,
+  denialReasonCode: DenialReasonCode | null = null,
+  denialReason: string | null = null,
+  appealInstructions: string | null = null
+): PriorAuthorizationRequest {
+  const request = getPriorAuthRequest(requestId, memberId);
+  if (!request) {
+    throw new AppError(404, "NotFound", "Prior authorization request not found.");
+  }
+
+  const fromStatus = request.status;
+  request.status = toStatus;
+  request.updatedAt = toIsoNow();
+  request.denialReasonCode = toStatus === "denied" ? denialReasonCode : null;
+  request.denialReason = toStatus === "denied" ? denialReason : null;
+  request.appealInstructions = toStatus === "denied" ? appealInstructions : null;
+
+  appendPriorAuthTransitionEvent(requestId, memberId, fromStatus, toStatus, actorType, reasonCode);
+  return request;
+}
+
+export function appendPriorAuthTransitionEvent(
+  requestId: string,
+  memberId: string,
+  fromStatus: PriorAuthStatus | null,
+  toStatus: PriorAuthStatus,
+  actorType: PriorAuthActorType,
+  reasonCode: string | null
+): StatusTransitionAuditEvent {
+  const event: StatusTransitionAuditEvent = {
+    eventId: buildPriorAuthEventId(),
+    requestId,
+    memberId,
+    actorType,
+    fromStatus,
+    toStatus,
+    occurredAt: toIsoNow(),
+    reasonCode,
+  };
+
+  PRIOR_AUTH_AUDIT_EVENTS.push(event);
+  return event;
+}
+
+export function getPriorAuthAuditEventsForRequest(
+  requestId: string,
+  memberId: string
+): StatusTransitionAuditEvent[] {
+  return PRIOR_AUTH_AUDIT_EVENTS
+    .filter((event) => event.requestId === requestId && event.memberId === memberId)
+    .sort((a, b) => a.occurredAt.localeCompare(b.occurredAt));
 }

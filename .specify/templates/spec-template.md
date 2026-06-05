@@ -83,7 +83,9 @@
 - **Privacy & Compliance**: Describe how the feature avoids PHI in logs, telemetry, and error
   payloads.
 - **Security**: Describe how member-context isolation, `x-member-id` propagation, request
-  validation, and forbidden cross-member access are enforced.
+  validation, forbidden cross-member access, and authorization-request isolation are enforced.
+- **Auditability & Decision Transparency**: Describe how status transitions are auditable and how
+  denial outcomes include machine-readable denial reason codes with member-safe messaging.
 - **Accessibility**: Describe the WCAG 2.1 AA behaviors required for any UI touched by the
   feature.
 - **Performance**: Describe how the feature will preserve API p95 < 500 ms and frontend FCP
@@ -129,6 +131,8 @@
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
 - **SC-005**: [Privacy/security metric, e.g., "No PHI appears in logs for the feature's happy or failure paths"]
 - **SC-006**: [Accessibility/performance metric, e.g., "Affected UI flows meet WCAG 2.1 AA checks and preserve FCP < 1.5 s"]
+- **SC-007**: [Auditability/authorization metric, e.g., "100% of tested status transitions
+  create audit events and denied decisions include a valid denial reason code"]
 
 ## Assumptions
 

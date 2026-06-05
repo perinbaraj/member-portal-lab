@@ -45,3 +45,41 @@ export interface Claim {
   diagnosisCode: string;
   procedureCode: string;
 }
+
+export type PriorAuthStatus = "pending" | "approved" | "denied" | "expired";
+
+export type DenialReasonCode =
+  | "medical_necessity"
+  | "missing_documentation"
+  | "non_covered_service"
+  | "eligibility_issue"
+  | "duplicate_request"
+  | "other";
+
+export interface PriorAuthorizationRequest {
+  requestId: string;
+  status: PriorAuthStatus;
+  procedureCode: string;
+  referringProvider: string;
+  clinicalJustification: string;
+  preferredFacility: string;
+  denialReasonCode: DenialReasonCode | null;
+  denialReason: string | null;
+  appealInstructions: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatePriorAuthRequestInput {
+  procedureCode: string;
+  referringProvider: string;
+  clinicalJustification: string;
+  preferredFacility: string;
+}
+
+export interface PriorAuthListResult {
+  requests: PriorAuthorizationRequest[];
+  page: number;
+  limit: number;
+  total: number;
+}

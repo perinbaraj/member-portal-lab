@@ -83,6 +83,58 @@ export interface AuthContext {
   roles: string[];
 }
 
+export type PriorAuthStatus = "pending" | "approved" | "denied" | "expired";
+
+export type DenialReasonCode =
+  | "medical_necessity"
+  | "missing_documentation"
+  | "non_covered_service"
+  | "eligibility_issue"
+  | "duplicate_request"
+  | "other";
+
+export interface PriorAuthorizationRequest {
+  requestId: string;
+  memberId: string;
+  procedureCode: string;
+  referringProvider: string;
+  clinicalJustification: string;
+  preferredFacility: string;
+  status: PriorAuthStatus;
+  denialReasonCode: DenialReasonCode | null;
+  denialReason: string | null;
+  appealInstructions: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PriorAuthActorType = "member" | "system" | "reviewer";
+
+export interface StatusTransitionAuditEvent {
+  eventId: string;
+  requestId: string;
+  memberId: string;
+  actorType: PriorAuthActorType;
+  fromStatus: PriorAuthStatus | null;
+  toStatus: PriorAuthStatus;
+  occurredAt: string;
+  reasonCode: string | null;
+}
+
+export interface CreatePriorAuthRequestInput {
+  procedureCode: string;
+  referringProvider: string;
+  clinicalJustification: string;
+  preferredFacility: string;
+}
+
+export interface PriorAuthListResponse {
+  requests: PriorAuthorizationRequest[];
+  page: number;
+  limit: number;
+  total: number;
+}
+
 declare global {
   namespace Express {
     interface Request {

@@ -70,7 +70,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T007 Create base models/entities that all stories depend on
 - [ ] T008 Configure error handling and PHI-safe logging infrastructure
 - [ ] T009 Setup environment configuration management
-- [ ] T010 [P] Establish accessibility, security, and performance acceptance checks for the feature
+- [ ] T010 [P] Establish accessibility, security, performance, and auditability acceptance checks for the feature
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -89,6 +89,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T011 [P] [US1] Backend test for [endpoint or route behavior] in tests/[name]
 - [ ] T012 [P] [US1] Frontend or interaction test for [user journey or accessibility behavior] in [path]
 - [ ] T013 [P] [US1] Performance or observability verification for affected flow in [path or command]
+- [ ] T013a [P] [US1] Audit verification for status transitions and denied decision reason-code behavior in [path]
 
 ### Implementation for User Story 1
 
@@ -97,7 +98,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T016 [US1] Implement backend service or route changes in server/[file].ts
 - [ ] T017 [US1] Implement frontend feature flow in src/[file].tsx
 - [ ] T018 [US1] Add request validation, member isolation, and generic error handling
-- [ ] T019 [US1] Add PHI-safe logging and accessible loading/error states
+- [ ] T019 [US1] Add PHI-safe logging, auditable transition events, and accessible loading/error states
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 

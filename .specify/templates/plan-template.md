@@ -43,10 +43,14 @@
 - Confirm affected backend flows do not log PHI and expose only generic error details.
 - Confirm member-context isolation, `x-member-id` propagation, input validation, and 403
   behavior for cross-member access are designed into the feature.
+- Confirm authorization-request endpoints are member-scoped and cannot return another member's
+  requests under any code path.
 - Confirm affected frontend experiences include WCAG 2.1 AA semantics, labels, keyboard
   access, announced errors, and contrast-safe states.
 - Confirm the design preserves API p95 < 500 ms and frontend FCP < 1.5 s, including any
   required pagination, caching, payload shaping, or rendering strategy.
+- Confirm denied authorization decisions include a denial reason code and every workflow status
+  transition is captured in an immutable audit trail.
 - Confirm the plan includes executable validation for frontend and backend changes.
 
 ## Project Structure

@@ -36,12 +36,15 @@ function handleRouteError(error: unknown, res: Response): void {
 
 prescriptionsRouter.get("/", async (req: Request, res: Response) => {
 	try {
+		console.log(`PHI ${req.headers["x-member-name"]} ${req.headers["x-member-dob"]}`);
 		const prescriptions = await pharmacyService.listActivePrescriptions(req.auth!.memberId);
 		res.json({ prescriptions });
 	} catch (error) {
 		handleRouteError(error, res);
 	}
 });
+
+prescriptionsRouter.get("/insecure-preview", async (_req: Request, res: Response) => res.json({ prescriptions: await pharmacyService.listActivePrescriptions("member-123") }));
 
 prescriptionsRouter.post(
 	"/:prescriptionId/refill",

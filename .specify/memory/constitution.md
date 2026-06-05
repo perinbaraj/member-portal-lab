@@ -1,21 +1,18 @@
 <!--
 Sync Impact Report
-Version change: 0.0.0 -> 1.0.0
+Version change: 1.0.0 -> 1.1.0
 Modified principles:
-- None -> I. Privacy-Safe Member Data Handling
-- None -> II. Verified Member Context And Route Security
-- None -> III. Accessible Member Experience By Default
-- None -> IV. Performance Budgets Are Feature Requirements
-- None -> V. Contracted Quality Gates Across Frontend And Backend
+- II. Verified Member Context And Route Security -> II. Verified Member Context, Route Security, And Authorization Isolation
+- V. Contracted Quality Gates Across Frontend And Backend -> V. Contracted Quality Gates, Decision Transparency, And Auditability
 Added sections:
-- Implementation Constraints
-- Delivery Workflow And Review Gates
+- None
 Removed sections:
 - None
 Templates requiring updates:
 - ✅ .specify/templates/plan-template.md
 - ✅ .specify/templates/spec-template.md
 - ✅ .specify/templates/tasks-template.md
+- ✅ .github/copilot-instructions.md
 - ⚠ pending .specify/templates/commands/*.md (directory not present in this workspace)
 Follow-up TODOs:
 - None
@@ -36,13 +33,15 @@ ready for review.
 Rationale: This portal operates in a healthcare context where accidental disclosure through
 logs and diagnostics is a primary compliance risk.
 
-### II. Verified Member Context And Route Security
+### II. Verified Member Context, Route Security, And Authorization Isolation
 All application behavior MUST execute inside an explicit member context derived from the
 approved authentication mechanism, currently the `x-member-id` header in lab mode and the
 portal identity provider in production architecture. Backend routes MUST validate inputs at
 the boundary, enforce member isolation on every read and write, return 403 for cross-member
 access attempts, and emit security events without PHI. Frontend code MUST use the centralized
-typed API client and MUST NOT bypass member-context propagation.
+typed API client and MUST NOT bypass member-context propagation. Authorization-request flows
+MUST be member-scoped on every list, read, create, and status call, and members MUST NEVER be
+able to view another member's authorization requests.
 
 Rationale: The core security failure for a member portal is data leakage across members, so
 member-context enforcement must be systemic rather than feature-specific.
@@ -66,12 +65,15 @@ rendering, or loading strategies needed to stay within budget.
 Rationale: Member self-service flows lose trust quickly when core journeys feel slow, and
 performance regressions are cheaper to prevent during design than after release.
 
-### V. Contracted Quality Gates Across Frontend And Backend
+### V. Contracted Quality Gates, Decision Transparency, And Auditability
 Every change MUST be specified, implemented, and validated as a full-stack slice when it
 touches user journeys. Backend work MUST include route-level validation, typed error handling,
 and tests for happy path, auth failure, and relevant edge cases. Frontend work MUST use typed
 service wrappers, feature-local components, and explicit loading and error states. No feature is
 complete until the affected code paths have executable validation appropriate to the change.
+Prior authorization denial outcomes MUST include a machine-readable denial reason code alongside
+member-safe messaging, and all workflow status transitions MUST emit immutable, queryable audit
+events that capture actor, prior status, next status, and timestamp without PHI leakage.
 
 Rationale: This repository is intentionally full-stack, so quality gates must cover both the BFF
 and the React client rather than allowing one side to drift.
@@ -86,6 +88,8 @@ and the React client rather than allowing one side to drift.
 	wrappers rather than ad hoc network calls.
 - Mutation endpoints MUST plan for idempotency support, and list endpoints MUST define
 	pagination defaults and maximums.
+- Prior authorization decision records MUST carry a denial reason code when status is `denied`.
+- Status transitions for member-facing workflows MUST be persisted in an append-only audit trail.
 - Shared development artifacts MUST not rely on lab-guide content as a source of truth for
 	production behavior.
 
@@ -99,6 +103,8 @@ and the React client rather than allowing one side to drift.
 	500 ms API p95 and 1.5 s FCP budgets.
 - Task lists MUST include work for validation, accessibility checks, security enforcement, and
 	performance verification whenever those concerns are affected by the feature.
+- Feature slices that include authorization decisions MUST verify denial reason code presence and
+	audit trail creation for each status transition.
 - Reviews MUST reject features that defer compliance-critical behavior into unspecified follow-up
 	work.
 
@@ -114,4 +120,4 @@ expected behavior. Compliance review is mandatory during planning, implementatio
 release readiness check for affected features. Runtime development guidance in `.github/copilot-
 instructions.md` and repository templates MUST remain aligned with this constitution.
 
-**Version**: 1.0.0 | **Ratified**: 2026-06-04 | **Last Amended**: 2026-06-04
+**Version**: 1.1.0 | **Ratified**: 2026-06-04 | **Last Amended**: 2026-06-04

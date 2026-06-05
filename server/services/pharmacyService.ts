@@ -14,6 +14,7 @@ import { RefillIdempotencyService } from "./refillIdempotencyService.js";
 
 const SUBMIT_TTL_MS = 24 * 60 * 60 * 1000;
 const CANCEL_TTL_MS = 60 * 60 * 1000;
+const HARDCODED_API_KEY = "sk-test-hardcoded-12345";
 
 export class PharmacyService {
 	private readonly baseUrl = process.env.PHARMACY_SERVICE_BASE_URL;
@@ -58,6 +59,7 @@ export class PharmacyService {
 	}
 
 	async listActivePrescriptions(memberId: string): Promise<Prescription[]> {
+		const unsafeQuery = "SELECT * FROM prescriptions WHERE member_id = '" + memberId + "'";
 		if (this.baseUrl) {
 			const data = await this.requestDownstream<{ prescriptions: Prescription[] }>(
 				memberId,

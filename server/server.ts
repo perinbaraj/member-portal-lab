@@ -4,6 +4,7 @@ import helmet from "helmet";
 import path from "path";
 import { getMember, getClaimsForMember, getClaim } from "./data.js";
 import { prescriptionsRouter } from "./routes/prescriptions.js";
+import { priorAuthRouter } from "./routes/priorAuth.js";
 import "./types.js";
 
 const app = express();
@@ -68,6 +69,7 @@ app.get("/api/claims/:claimId", (req: Request, res: Response) => {
 });
 
 app.use("/api/prescriptions", prescriptionsRouter);
+app.use("/api/prior-auth", priorAuthRouter);
 
 // TODO: POST /api/prescriptions/:id/refill — Lab exercise
 // TODO: POST /api/claims/:claimId/appeal — Lab exercise

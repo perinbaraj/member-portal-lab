@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { MemberProfile } from './components/MemberProfile';
 import { PrescriptionsList } from './components/PrescriptionsList';
 import { ClaimsList } from './components/ClaimsList';
+import { PriorAuthForm } from './components/PriorAuthForm';
 import { httpClient } from './services/httpClient';
 import './App.css';
 
-type View = 'profile' | 'prescriptions' | 'claims';
+type View = 'profile' | 'prescriptions' | 'claims' | 'prior-auth';
 
 export const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('profile');
@@ -41,6 +42,12 @@ export const App: React.FC = () => {
             onClick={() => setCurrentView('claims')}
           >
             Claims
+          </button>
+          <button
+            className={`nav-button ${currentView === 'prior-auth' ? 'active' : ''}`}
+            onClick={() => setCurrentView('prior-auth')}
+          >
+            Prior Auth
           </button>
           <button
             className="nav-button auth-button"
@@ -92,6 +99,7 @@ export const App: React.FC = () => {
         {currentView === 'profile' && <MemberProfile />}
         {currentView === 'prescriptions' && <PrescriptionsList />}
         {currentView === 'claims' && <ClaimsList />}
+        {currentView === 'prior-auth' && <PriorAuthForm />}
       </main>
 
       <footer className="app-footer">
