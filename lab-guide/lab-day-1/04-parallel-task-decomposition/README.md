@@ -24,7 +24,6 @@ Decompose a healthcare feature into independent parallel workstreams, execute th
 Run the Spec Kit workflow for this feature (apply what you learned in Labs 1–2):
 
 ```bash
-specify init appointment-scheduling --integration copilot
 ```
 
 ```
@@ -70,7 +69,7 @@ Each lane runs independently. If working solo, run sequentially with strict file
 **Lane A prompt:**
 
 ```
-/speckit.implement Implement only the appointment API routes (tasks T-001 through T-005). Create server/routes/appointments.ts and server/services/scheduling-service.ts. Do not create test files. Follow the type contracts in server/types.ts.
+/speckit.implement Implement only the appointment API routes (tasks T-001 through T-005). Create server/routes/appointments.ts and server/services/scheduling-service.ts. Do not create test files. Follow the type contracts in server/types.ts. 
 ```
 
 **Lane B prompt:**
@@ -83,6 +82,20 @@ Write tests for the appointment scheduling API based on the acceptance scenarios
 
 ```
 Create Zod validation schemas for all appointment API request bodies based on spec.md. File: server/schemas/appointments.ts. Also create an error catalog documenting all error codes and messages for the appointment feature. File: docs/appointment-errors.md.
+```
+
+**First Prompt**
+
+```
+Create Zod validation schemas for all appointment API request bodies based on spec.md. File: server/schemas/appointments.ts. Also create an error catalog documenting all error codes and messages for the appointment feature. File: docs/appointment-errors.md. USE PARALLEL SUBAGENTS FOR EXECUTION 
+```
+
+**Second Prompt**
+
+```
+/speckit.implement Implement only the appointment API routes (tasks T-001 through T-005). Create server/routes/appointments.ts and server/services/scheduling-service.ts. Do not create test files. Follow the type contracts in server/types.ts.  USE SUBAGENTS WITH AGENT HANDOFFS
+
+Write tests for the appointment scheduling API based on the acceptance scenarios in spec.md. Test file: tests/appointments.test.ts. Use the type contracts in server/types.ts. Do not implement the routes — import them from server/routes/appointments.ts 
 ```
 
 ### Step 5: Merge in Planned Order
