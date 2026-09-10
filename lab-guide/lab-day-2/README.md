@@ -27,9 +27,9 @@ Keep it running throughout Day 2. `Ctrl+C` to stop, same command to restart.
 | Module 1 | Day 1 recap and Day 2 goals | Instructor-led | Prioritized quality backlog |
 | Module 2 | Lab 5: Context Engineering — Healthcare Domain | Hands-on | Before/after comparison + reusable templates |
 | Module 3 | Lab 6: Quality Gates — GHAS for Healthcare Code | Hands-on | CodeQL workflow + gate policy + fixed findings |
-| Module 5 | Capstone: Benefits Eligibility Checker | Team hands-on | Full feature with spec, tests, gates, and governance |
-| Module 6 | Team demos and validation walkthrough | Demo | Evidence-based 5-minute demo |
-| Module 7 | Closeout and post-session action plan | Group review | Next-sprint adoption plan |
+| Module 4 | Capstone: Benefits Eligibility Checker | Team hands-on | Full feature with spec, tests, gates, and governance |
+| Module 5 | Team demos and validation walkthrough | Demo | Evidence-based 5-minute demo |
+| Module 6 | Closeout and post-session action plan | Group review | Next-sprint adoption plan |
 
 ## Lab Sequence
 
