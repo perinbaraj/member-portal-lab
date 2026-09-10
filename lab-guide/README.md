@@ -92,7 +92,7 @@ All labs follow the [GitHub Spec Kit](https://github.com/github/spec-kit) method
 | Day | Directory | Labs | Healthcare Use Cases |
 |---|---|---|---|
 | Day 1 | [lab-day-1/](lab-day-1/) | Labs 1–4 | Prescription refill, prior auth, appointments |
-| Day 2 | [lab-day-2/](lab-day-2/) | Labs 5–8 | Context engineering, quality gates, Codex Workflow, benefits eligibility |
+| Day 2 | [lab-day-2/](lab-day-2/) | Labs 5–6 + Capstone | Context engineering, quality gates, benefits eligibility |
 
 ---
 
@@ -146,7 +146,6 @@ All labs follow the [GitHub Spec Kit](https://github.com/github/spec-kit) method
 | Module 1 | Day 1 recap and Day 2 goals | Instructor-led | Prioritized quality backlog |
 | Module 2 | Lab 5: Context Engineering — Healthcare Domain | Hands-on | Before/after comparison + reusable templates |
 | Module 3 | Lab 6: Quality Gates — GHAS for Healthcare Code | Hands-on | CodeQL workflow + gate policy + fixed findings |
-| Module 4 | Lab 7: Hands-on Copilot + Codex Workflow | Hands-on | Codex generation + Copilot review + human approval gate |
 | Module 5 | Capstone: Benefits Eligibility Checker | Team hands-on | Full feature with spec, tests, gates, governance |
 | Module 6 | Team demos and validation walkthrough | Demo | Evidence-based 5-minute demo |
 | Module 7 | Closeout and post-session action plan | Group review | Next-sprint adoption plan |
@@ -155,8 +154,7 @@ All labs follow the [GitHub Spec Kit](https://github.com/github/spec-kit) method
 
 1. [Lab 5: Context Engineering & Token Optimization — Healthcare Domain](lab-day-2/01-context-engineering-token-optimization/README.md)
 2. [Lab 6: Quality Gates — GHAS + Code Scanning](lab-day-2/02-quality-gates-ghas-sonar/README.md)
-3. [Lab 7: Hands-on Copilot + Codex Third-Party Model Workflow](lab-day-2/07-third-party-model-codex-basics/README.md)
-4. [Capstone: Benefits Eligibility Checker](lab-day-2/03-capstone/README.md)
+3. [Capstone: Benefits Eligibility Checker](lab-day-2/03-capstone/README.md)
 
 ---
 
