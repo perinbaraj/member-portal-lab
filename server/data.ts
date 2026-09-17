@@ -1,4 +1,18 @@
-import { Member, Prescription, Claim } from "./types.js";
+import {
+  Member,
+  Prescription,
+  Claim,
+  RefillRequest,
+  RefillMutationResult,
+  AppError,
+  PriorAuthorizationRequest,
+  StatusTransitionAuditEvent,
+  PriorAuthStatus,
+  PriorAuthActorType,
+  CreatePriorAuthRequestInput,
+  PriorAuthListResponse,
+  DenialReasonCode,
+} from "./types.js";
 
 // ─── Mock Data ───────────────────────────────────────────────────────────────
 
@@ -84,7 +98,10 @@ const PRESCRIPTIONS: Prescription[] = [
     dosage: "1 tablet daily",
     lastFilledDate: "Recent",
     refillsRemaining: 3,
-    status: "active",
+    prescriptionStatus: "active",
+    refillStatus: "eligible",
+    refillStatusReason: "REFILL_AVAILABLE",
+    pendingRefillRequestedAt: null,
   },
   {
     prescriptionId: "RX-70002",
@@ -93,7 +110,10 @@ const PRESCRIPTIONS: Prescription[] = [
     dosage: "1 tablet twice daily",
     lastFilledDate: "Recent",
     refillsRemaining: 5,
-    status: "active",
+    prescriptionStatus: "active",
+    refillStatus: "pending",
+    refillStatusReason: "ALREADY_PENDING",
+    pendingRefillRequestedAt: "2026-06-04T10:00:00.000Z",
   },
   {
     prescriptionId: "RX-70003",
@@ -102,7 +122,10 @@ const PRESCRIPTIONS: Prescription[] = [
     dosage: "1 tablet at bedtime",
     lastFilledDate: "Recent",
     refillsRemaining: 0,
-    status: "active",
+    prescriptionStatus: "active",
+    refillStatus: "ineligible",
+    refillStatusReason: "NO_REFILLS_REMAINING",
+    pendingRefillRequestedAt: null,
   },
   {
     prescriptionId: "RX-70004",
@@ -111,7 +134,10 @@ const PRESCRIPTIONS: Prescription[] = [
     dosage: "1 capsule before breakfast",
     lastFilledDate: "Recent",
     refillsRemaining: 2,
-    status: "active",
+    prescriptionStatus: "active",
+    refillStatus: "processing",
+    refillStatusReason: "ALREADY_PROCESSING",
+    pendingRefillRequestedAt: "2026-06-04T09:30:00.000Z",
   },
   {
     prescriptionId: "RX-70005",
@@ -120,7 +146,165 @@ const PRESCRIPTIONS: Prescription[] = [
     dosage: "2 puffs every 4-6 hours as needed",
     lastFilledDate: "Recent",
     refillsRemaining: 4,
-    status: "active",
+    prescriptionStatus: "active",
+    refillStatus: "eligible",
+    refillStatusReason: "REFILL_AVAILABLE",
+    pendingRefillRequestedAt: null,
+  },
+];
+
+const REFILL_REQUESTS: RefillRequest[] = [
+  {
+    refillRequestId: "RFL-90001",
+    prescriptionId: "RX-70002",
+    memberId: "M-10001",
+    status: "pending",
+    requestedAt: "2026-06-04T10:00:00.000Z",
+    updatedAt: "2026-06-04T10:00:00.000Z",
+    canceledAt: null,
+    downstreamReference: "DSP-10001",
+  },
+  {
+    refillRequestId: "RFL-90002",
+    prescriptionId: "RX-70004",
+    memberId: "M-10002",
+    status: "processing",
+    requestedAt: "2026-06-04T09:30:00.000Z",
+    updatedAt: "2026-06-04T09:35:00.000Z",
+    canceledAt: null,
+    downstreamReference: "DSP-10002",
+  },
+];
+
+const PRIOR_AUTH_REQUESTS: PriorAuthorizationRequest[] = [
+  {
+    requestId: "PAR-10001",
+    memberId: "M-10001",
+    procedureCode: "27447",
+    referringProvider: "Dr. Alvarez",
+    clinicalJustification: "Persistent knee pain with severe osteoarthritis and failed conservative management.",
+    preferredFacility: "Central Ortho Center",
+    status: "pending",
+    denialReasonCode: null,
+    denialReason: null,
+    appealInstructions: null,
+    createdAt: "2026-06-04T08:00:00.000Z",
+    updatedAt: "2026-06-04T08:00:00.000Z",
+  },
+  {
+    requestId: "PAR-10002",
+    memberId: "M-10001",
+    procedureCode: "29881",
+    referringProvider: "Dr. Alvarez",
+    clinicalJustification: "Meniscal injury with persistent instability after physical therapy.",
+    preferredFacility: "Central Ortho Center",
+    status: "denied",
+    denialReasonCode: "medical_necessity",
+    denialReason: "The submitted documentation does not currently support medical necessity criteria.",
+    appealInstructions: "Please contact member services to review appeal options and required documents.",
+    createdAt: "2026-06-03T10:00:00.000Z",
+    updatedAt: "2026-06-03T14:00:00.000Z",
+  },
+  {
+    requestId: "PAR-20001",
+    memberId: "M-10002",
+    procedureCode: "72148",
+    referringProvider: "Dr. Li",
+    clinicalJustification: "Lumbar pain with neurologic symptoms and failed conservative treatment.",
+    preferredFacility: "North Imaging Center",
+    status: "approved",
+    denialReasonCode: null,
+    denialReason: null,
+    appealInstructions: null,
+    createdAt: "2026-06-02T09:00:00.000Z",
+    updatedAt: "2026-06-02T16:00:00.000Z",
+  },
+  {
+    requestId: "PAR-30001",
+    memberId: "M-10003",
+    procedureCode: "73721",
+    referringProvider: "Dr. Singh",
+    clinicalJustification: "Persistent ankle instability following trauma.",
+    preferredFacility: "South Diagnostic Pavilion",
+    status: "expired",
+    denialReasonCode: null,
+    denialReason: null,
+    appealInstructions: null,
+    createdAt: "2026-05-01T09:00:00.000Z",
+    updatedAt: "2026-06-01T09:00:00.000Z",
+  },
+];
+
+const PRIOR_AUTH_AUDIT_EVENTS: StatusTransitionAuditEvent[] = [
+  {
+    eventId: "PAE-10001",
+    requestId: "PAR-10001",
+    memberId: "M-10001",
+    actorType: "member",
+    fromStatus: null,
+    toStatus: "pending",
+    occurredAt: "2026-06-04T08:00:00.000Z",
+    reasonCode: null,
+  },
+  {
+    eventId: "PAE-10002",
+    requestId: "PAR-10002",
+    memberId: "M-10001",
+    actorType: "member",
+    fromStatus: null,
+    toStatus: "pending",
+    occurredAt: "2026-06-03T10:00:00.000Z",
+    reasonCode: null,
+  },
+  {
+    eventId: "PAE-10003",
+    requestId: "PAR-10002",
+    memberId: "M-10001",
+    actorType: "reviewer",
+    fromStatus: "pending",
+    toStatus: "denied",
+    occurredAt: "2026-06-03T14:00:00.000Z",
+    reasonCode: "medical_necessity",
+  },
+  {
+    eventId: "PAE-20001",
+    requestId: "PAR-20001",
+    memberId: "M-10002",
+    actorType: "member",
+    fromStatus: null,
+    toStatus: "pending",
+    occurredAt: "2026-06-02T09:00:00.000Z",
+    reasonCode: null,
+  },
+  {
+    eventId: "PAE-20002",
+    requestId: "PAR-20001",
+    memberId: "M-10002",
+    actorType: "reviewer",
+    fromStatus: "pending",
+    toStatus: "approved",
+    occurredAt: "2026-06-02T16:00:00.000Z",
+    reasonCode: null,
+  },
+  {
+    eventId: "PAE-30001",
+    requestId: "PAR-30001",
+    memberId: "M-10003",
+    actorType: "member",
+    fromStatus: null,
+    toStatus: "pending",
+    occurredAt: "2026-05-01T09:00:00.000Z",
+    reasonCode: null,
+  },
+  {
+    eventId: "PAE-30002",
+    requestId: "PAR-30001",
+    memberId: "M-10003",
+    actorType: "system",
+    fromStatus: "pending",
+    toStatus: "expired",
+    occurredAt: "2026-06-01T09:00:00.000Z",
+    reasonCode: "auto_expiry",
   },
 ];
 
@@ -140,7 +324,7 @@ export function getClaim(claimId: string, memberId: string): Claim | undefined {
 
 export function getActivePrescriptions(memberId: string): Prescription[] {
   return PRESCRIPTIONS.filter(
-    (p) => p.memberId === memberId && p.status === "active"
+    (p) => p.memberId === memberId && p.prescriptionStatus === "active"
   );
 }
 
@@ -151,4 +335,296 @@ export function getPrescription(
   return PRESCRIPTIONS.find(
     (p) => p.prescriptionId === prescriptionId && p.memberId === memberId
   );
+}
+
+export function getPrescriptionById(
+  prescriptionId: string
+): Prescription | undefined {
+  return PRESCRIPTIONS.find((prescription) => prescription.prescriptionId === prescriptionId);
+}
+
+export function getRefillRequest(
+  prescriptionId: string,
+  memberId: string
+): RefillRequest | undefined {
+  return REFILL_REQUESTS.find(
+    (request) =>
+      request.prescriptionId === prescriptionId &&
+      request.memberId === memberId &&
+      request.status !== "canceled"
+  );
+}
+
+function syncPrescriptionRefillState(
+  prescription: Prescription,
+  refillRequest: RefillRequest | undefined
+): void {
+  if (prescription.prescriptionStatus !== "active") {
+    prescription.refillStatus = "ineligible";
+    prescription.refillStatusReason = "PRESCRIPTION_INACTIVE";
+    prescription.pendingRefillRequestedAt = null;
+    return;
+  }
+
+  if (refillRequest?.status === "pending") {
+    prescription.refillStatus = "pending";
+    prescription.refillStatusReason = "ALREADY_PENDING";
+    prescription.pendingRefillRequestedAt = refillRequest.requestedAt;
+    return;
+  }
+
+  if (refillRequest?.status === "processing") {
+    prescription.refillStatus = "processing";
+    prescription.refillStatusReason = "ALREADY_PROCESSING";
+    prescription.pendingRefillRequestedAt = refillRequest.requestedAt;
+    return;
+  }
+
+  prescription.pendingRefillRequestedAt = null;
+  if (prescription.refillsRemaining > 0) {
+    prescription.refillStatus = "eligible";
+    prescription.refillStatusReason = "REFILL_AVAILABLE";
+  } else {
+    prescription.refillStatus = "ineligible";
+    prescription.refillStatusReason = "NO_REFILLS_REMAINING";
+  }
+}
+
+export function requestRefill(
+  prescriptionId: string,
+  memberId: string
+): RefillMutationResult {
+  const prescription = getPrescription(prescriptionId, memberId);
+  if (!prescription) {
+    throw new AppError(404, "NotFound", "Prescription not found.");
+  }
+
+  const existingRefill = getRefillRequest(prescriptionId, memberId);
+  syncPrescriptionRefillState(prescription, existingRefill);
+
+  if (prescription.refillStatus === "pending") {
+    return {
+      success: true,
+      refillStatus: "pending",
+      message: "Your refill request is already pending.",
+      code: "REFILL_ALREADY_PENDING",
+      duplicate: true,
+    };
+  }
+
+  if (prescription.refillStatus === "processing") {
+    throw new AppError(
+      409,
+      "Conflict",
+      "This refill is already being processed.",
+      "REFILL_ALREADY_PROCESSING"
+    );
+  }
+
+  if (prescription.refillStatus === "ineligible") {
+    throw new AppError(
+      422,
+      "UnprocessableEntity",
+      "This prescription is not eligible for refill.",
+      "REFILL_INELIGIBLE"
+    );
+  }
+
+  const now = new Date().toISOString();
+  REFILL_REQUESTS.push({
+    refillRequestId: `RFL-${Date.now()}`,
+    prescriptionId,
+    memberId,
+    status: "pending",
+    requestedAt: now,
+    updatedAt: now,
+    canceledAt: null,
+    downstreamReference: null,
+  });
+  syncPrescriptionRefillState(prescription, getRefillRequest(prescriptionId, memberId));
+
+  return {
+    success: true,
+    refillStatus: "pending",
+    message: "Refill request submitted.",
+    code: "REFILL_PENDING",
+    duplicate: false,
+  };
+}
+
+export function cancelRefill(
+  prescriptionId: string,
+  memberId: string
+): RefillMutationResult {
+  const prescription = getPrescription(prescriptionId, memberId);
+  if (!prescription) {
+    throw new AppError(404, "NotFound", "Prescription not found.");
+  }
+
+  const refillRequest = getRefillRequest(prescriptionId, memberId);
+  syncPrescriptionRefillState(prescription, refillRequest);
+
+  if (!refillRequest) {
+    throw new AppError(
+      422,
+      "UnprocessableEntity",
+      "There is no pending refill to cancel.",
+      "REFILL_NOT_PENDING"
+    );
+  }
+
+  if (refillRequest.status === "processing") {
+    throw new AppError(
+      409,
+      "Conflict",
+      "This refill can no longer be changed.",
+      "REFILL_ALREADY_PROCESSING"
+    );
+  }
+
+  const now = new Date().toISOString();
+  refillRequest.status = "canceled";
+  refillRequest.updatedAt = now;
+  refillRequest.canceledAt = now;
+  syncPrescriptionRefillState(prescription, undefined);
+
+  return {
+    success: true,
+    refillStatus: prescription.refillStatus === "eligible" ? "eligible" : "pending",
+    message: "Pending refill canceled.",
+    code: "REFILL_CANCELED",
+    duplicate: false,
+  };
+}
+
+function toIsoNow(): string {
+  return new Date().toISOString();
+}
+
+function buildPriorAuthRequestId(): string {
+  return `PAR-${Date.now()}`;
+}
+
+function buildPriorAuthEventId(): string {
+  return `PAE-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+}
+
+export function listPriorAuthRequests(
+  memberId: string,
+  page = 1,
+  limit = 20
+): PriorAuthListResponse {
+  const memberRequests = PRIOR_AUTH_REQUESTS
+    .filter((request) => request.memberId === memberId)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+
+  const safePage = page < 1 ? 1 : page;
+  const safeLimit = limit < 1 ? 20 : limit > 100 ? 100 : limit;
+  const start = (safePage - 1) * safeLimit;
+  const requests = memberRequests.slice(start, start + safeLimit);
+
+  return {
+    requests,
+    page: safePage,
+    limit: safeLimit,
+    total: memberRequests.length,
+  };
+}
+
+export function getPriorAuthRequest(
+  requestId: string,
+  memberId: string
+): PriorAuthorizationRequest | undefined {
+  return PRIOR_AUTH_REQUESTS.find(
+    (request) => request.requestId === requestId && request.memberId === memberId
+  );
+}
+
+export function getPriorAuthRequestById(
+  requestId: string
+): PriorAuthorizationRequest | undefined {
+  return PRIOR_AUTH_REQUESTS.find((request) => request.requestId === requestId);
+}
+
+export function createPriorAuthRequest(
+  memberId: string,
+  input: CreatePriorAuthRequestInput
+): PriorAuthorizationRequest {
+  const now = toIsoNow();
+  const request: PriorAuthorizationRequest = {
+    requestId: buildPriorAuthRequestId(),
+    memberId,
+    procedureCode: input.procedureCode,
+    referringProvider: input.referringProvider,
+    clinicalJustification: input.clinicalJustification,
+    preferredFacility: input.preferredFacility,
+    status: "pending",
+    denialReasonCode: null,
+    denialReason: null,
+    appealInstructions: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  PRIOR_AUTH_REQUESTS.push(request);
+  appendPriorAuthTransitionEvent(request.requestId, memberId, null, "pending", "member", null);
+  return request;
+}
+
+export function updatePriorAuthStatus(
+  requestId: string,
+  memberId: string,
+  toStatus: PriorAuthStatus,
+  actorType: PriorAuthActorType,
+  reasonCode: string | null = null,
+  denialReasonCode: DenialReasonCode | null = null,
+  denialReason: string | null = null,
+  appealInstructions: string | null = null
+): PriorAuthorizationRequest {
+  const request = getPriorAuthRequest(requestId, memberId);
+  if (!request) {
+    throw new AppError(404, "NotFound", "Prior authorization request not found.");
+  }
+
+  const fromStatus = request.status;
+  request.status = toStatus;
+  request.updatedAt = toIsoNow();
+  request.denialReasonCode = toStatus === "denied" ? denialReasonCode : null;
+  request.denialReason = toStatus === "denied" ? denialReason : null;
+  request.appealInstructions = toStatus === "denied" ? appealInstructions : null;
+
+  appendPriorAuthTransitionEvent(requestId, memberId, fromStatus, toStatus, actorType, reasonCode);
+  return request;
+}
+
+export function appendPriorAuthTransitionEvent(
+  requestId: string,
+  memberId: string,
+  fromStatus: PriorAuthStatus | null,
+  toStatus: PriorAuthStatus,
+  actorType: PriorAuthActorType,
+  reasonCode: string | null
+): StatusTransitionAuditEvent {
+  const event: StatusTransitionAuditEvent = {
+    eventId: buildPriorAuthEventId(),
+    requestId,
+    memberId,
+    actorType,
+    fromStatus,
+    toStatus,
+    occurredAt: toIsoNow(),
+    reasonCode,
+  };
+
+  PRIOR_AUTH_AUDIT_EVENTS.push(event);
+  return event;
+}
+
+export function getPriorAuthAuditEventsForRequest(
+  requestId: string,
+  memberId: string
+): StatusTransitionAuditEvent[] {
+  return PRIOR_AUTH_AUDIT_EVENTS
+    .filter((event) => event.requestId === requestId && event.memberId === memberId)
+    .sort((a, b) => a.occurredAt.localeCompare(b.occurredAt));
 }

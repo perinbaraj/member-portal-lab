@@ -1,0 +1,232 @@
+openapi: 3.1.0
+info:
+  title: Member Portal Prior Authorization Contract
+  version: 1.0.0
+  description: |
+    BFF contract for listing and submitting member prior authorization requests with
+    denial transparency and status tracking.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/prior-auth:
+    get:
+      summary: List prior authorization requests for the authenticated member
+      operationId: listPriorAuthRequests
+      parameters:
+        - in: header
+          name: x-member-id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Member-scoped prior authorization requests
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [requests, page, limit, total]
+                properties:
+                  requests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PriorAuthorizationRequestView'
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+                  total:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      summary: Submit a new prior authorization request
+      operationId: createPriorAuthRequest
+      parameters:
+        - in: header
+          name: x-member-id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePriorAuthRequest'
+      responses:
+        '201':
+          description: Prior authorization request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriorAuthorizationRequestView'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/prior-auth/{requestId}:
+    get:
+      summary: Get one prior authorization request owned by the authenticated member
+      operationId: getPriorAuthRequest
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+        - in: header
+          name: x-member-id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Member-scoped request details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriorAuthorizationRequestView'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  parameters:
+    RequestId:
+      in: path
+      name: requestId
+      required: true
+      schema:
+        type: string
+  responses:
+    Unauthorized:
+      description: Missing or invalid member context
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Authenticated member attempted to access another member's prior auth request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Request not found for the authenticated member
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    CreatePriorAuthRequest:
+      type: object
+      required:
+        - procedureCode
+        - referringProvider
+        - clinicalJustification
+        - preferredFacility
+      properties:
+        procedureCode:
+          type: string
+          minLength: 1
+          maxLength: 32
+        referringProvider:
+          type: string
+          minLength: 1
+          maxLength: 120
+        clinicalJustification:
+          type: string
+          minLength: 1
+          maxLength: 500
+        preferredFacility:
+          type: string
+          minLength: 1
+          maxLength: 120
+    PriorAuthorizationRequestView:
+      type: object
+      required:
+        - requestId
+        - status
+        - procedureCode
+        - referringProvider
+        - clinicalJustification
+        - preferredFacility
+        - createdAt
+        - updatedAt
+      properties:
+        requestId:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, denied, expired]
+        procedureCode:
+          type: string
+        referringProvider:
+          type: string
+        clinicalJustification:
+          type: string
+        preferredFacility:
+          type: string
+        denialReasonCode:
+          oneOf:
+            - $ref: '#/components/schemas/DenialReasonCode'
+            - type: 'null'
+        denialReason:
+          oneOf:
+            - type: string
+            - type: 'null'
+        appealInstructions:
+          oneOf:
+            - type: string
+            - type: 'null'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    DenialReasonCode:
+      type: string
+      enum:
+        - medical_necessity
+        - missing_documentation
+        - non_covered_service
+        - eligibility_issue
+        - duplicate_request
+        - other
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          oneOf:
+            - type: string
+            - type: 'null'

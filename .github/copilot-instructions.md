@@ -32,6 +32,9 @@ This is a full-stack healthcare member portal with a Node.js + Express BFF backe
 - Validate all inputs with Zod schemas at the route level
 - Use parameterized queries (no string concatenation for data access)
 - Return 403 for cross-member access attempts; log a security event (no PHI in log)
+- Prior auth request endpoints MUST never return another member's auth requests
+- Prior auth denial decisions MUST include a machine-readable denial reason code
+- All status transitions in member workflows MUST be auditable with immutable event records
 - All responses include security headers via Helmet
 
 ### Code Style
@@ -57,3 +60,9 @@ This is a full-stack healthcare member portal with a Node.js + Express BFF backe
 - Color contrasts must meet AA standards
 - Form inputs must have associated `<label>` elements
 - Error messages must be announced to screen readers
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+at specs/002-prior-auth-requests/plan.md
+<!-- SPECKIT END -->
