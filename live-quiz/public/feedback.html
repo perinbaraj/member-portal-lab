@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Live Quiz · Feedback</title>
+<style>
+:root{--bg:#111318;--panel:#1b1f26;--inset:#0c0e12;--border:#3d444d;--ink:#f0f3f6;--sub:#9ea7b3;
+--accent:#8c96a3;--accent-em:#59636f;--blue:#58a6ff;--green:#3fb950;--red:#f85149;--shadow:rgba(0,0,0,.5)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:28px 18px;background:radial-gradient(900px 500px at 50% -10%,#252b33,var(--bg) 62%);
+color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.shell{width:min(720px,100%);margin:0 auto}
+.top{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px}
+.kicker{font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.return-link{color:var(--ink);text-decoration:none;border:1px solid var(--border);border-radius:10px;padding:9px 13px;font-weight:700}
+.return-link:hover{border-color:var(--accent)}
+.card{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--panel),#171a20);border:1px solid var(--border);
+border-radius:20px;padding:32px;box-shadow:0 24px 60px var(--shadow)}
+.card::before{content:"";position:absolute;inset:0 0 auto;height:5px;background:linear-gradient(90deg,#59636f,#b7c0cc,#59636f)}
+h1{font-size:34px;line-height:1.1;margin:0 0 9px}
+.intro{color:var(--sub);font-size:17px;line-height:1.5;margin:0 0 24px}
+.context{display:inline-flex;align-items:center;gap:7px;background:var(--inset);border:1px solid var(--border);border-radius:999px;
+padding:7px 11px;color:var(--sub);font-size:13px;font-weight:700;margin-bottom:22px}
+form{display:grid;gap:20px}
+fieldset{border:0;padding:0;margin:0}
+legend,.field-label{display:block;color:var(--ink);font-weight:800;margin-bottom:9px}
+.required{color:var(--sub);font-size:13px;font-weight:600}
+.rating{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
+.rating label{cursor:pointer}
+.rating input{position:absolute;opacity:0}
+.rating span{display:flex;min-height:56px;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:11px;
+background:var(--inset);font-size:18px;font-weight:900}
+.rating input:checked+span{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue);color:var(--blue)}
+.rating input:focus-visible+span,input:focus-visible,select:focus-visible,textarea:focus-visible,.button:focus-visible,.return-link:focus-visible{
+outline:3px solid var(--accent);outline-offset:3px}
+select,input[type="email"],textarea{width:100%;background:var(--inset);border:1px solid var(--border);border-radius:11px;color:var(--ink);
+font:inherit;padding:12px 13px}
+textarea{min-height:150px;resize:vertical;line-height:1.5}
+.field-help{display:flex;justify-content:space-between;gap:14px;color:var(--sub);font-size:13px;margin-top:6px}
+.button{appearance:none;border:1px solid var(--accent-em);background:var(--accent-em);color:#fff;padding:13px 22px;border-radius:11px;
+font:inherit;font-weight:800;cursor:pointer;justify-self:start}
+.button:hover{background:var(--accent)}
+.button:disabled{opacity:.55;cursor:wait}
+.status{min-height:24px;font-weight:700}
+.status.error{color:var(--red)}
+.status.success{color:var(--green)}
+.success-panel{text-align:center;padding:26px 4px}
+.success-panel h2{font-size:28px;margin:0 0 8px}
+.success-panel p{color:var(--sub);font-size:16px;line-height:1.5}
+.hide{display:none!important}
+@media(max-width:560px){.card{padding:26px 20px}.top{align-items:flex-start}.rating{gap:6px}.rating span{min-height:48px}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="top">
+    <div class="kicker">Live Quiz · Feedback</div>
+    <a class="return-link" id="returnLink" href="/">Return to quiz</a>
+  </div>
+  <section class="card" aria-labelledby="feedbackTitle">
+    <div id="formPanel">
+      <h1 id="feedbackTitle">Help improve the quiz</h1>
+      <p class="intro">Tell us what worked and what would make the host or player experience better.</p>
+      <div class="context" id="contextLabel">General feedback</div>
+      <form id="feedbackForm">
+        <fieldset>
+          <legend>Overall rating <span class="required">(required)</span></legend>
+          <div class="rating">
+            <label><input type="radio" name="rating" value="1" required/><span>1</span></label>
+            <label><input type="radio" name="rating" value="2"/><span>2</span></label>
+            <label><input type="radio" name="rating" value="3"/><span>3</span></label>
+            <label><input type="radio" name="rating" value="4"/><span>4</span></label>
+            <label><input type="radio" name="rating" value="5"/><span>5</span></label>
+          </div>
+          <div class="field-help"><span>Needs work</span><span>Excellent</span></div>
+        </fieldset>
+
+        <label>
+          <span class="field-label">Category <span class="required">(required)</span></span>
+          <select id="category" required>
+            <option value="">Choose a category</option>
+            <option value="bug">Bug</option>
+            <option value="suggestion">Suggestion</option>
+            <option value="quiz-content">Quiz content</option>
+            <option value="ease-of-use">Ease of use</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+
+        <label>
+          <span class="field-label">Comments <span class="required">(required)</span></span>
+          <textarea id="comments" maxlength="2000" required placeholder="What happened, or what should we improve?"></textarea>
+          <span class="field-help"><span>Do not include passwords or access codes.</span><span id="commentCount">0 / 2000</span></span>
+        </label>
+
+        <label>
+          <span class="field-label">Contact email <span class="required">(optional)</span></span>
+          <input id="email" type="email" maxlength="254" autocomplete="email" placeholder="name@example.com"/>
+          <span class="field-help">Only include this if you would like a follow-up.</span>
+        </label>
+
+        <div class="status" id="status" role="alert" aria-live="polite"></div>
+        <button class="button" id="submitBtn" type="submit">Submit feedback</button>
+      </form>
+    </div>
+    <div class="success-panel hide" id="successPanel" tabindex="-1">
+      <h2>Thank you</h2>
+      <p>Your feedback was saved and will help improve the next quiz experience.</p>
+    </div>
+  </section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const params=new URLSearchParams(location.search);
+const requestedRole=params.get("role");
+const role=["host","player"].includes(requestedRole)?requestedRole:"unknown";
+const requestedSession=params.get("session")||"";
+const sessionId=/^[A-Za-z0-9_-]{20,64}$/.test(requestedSession)?requestedSession:"";
+const returnUrl=role==="player"&&sessionId?`/play?session=${encodeURIComponent(sessionId)}`:"/";
+$("returnLink").href=returnUrl;
+$("returnLink").textContent=role==="player"?"Return to player view":role==="host"?"Return to host":"Return to quiz";
+$("contextLabel").textContent=sessionId
+  ? `${role==="player"?"Player":role==="host"?"Host":"Quiz"} feedback · session context included`
+  : `${role==="player"?"Player":role==="host"?"Host":"General"} feedback`;
+$("comments").addEventListener("input",()=>{
+  $("commentCount").textContent=`${$("comments").value.length} / 2000`;
+});
+$("feedbackForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+  const selected=document.querySelector('input[name="rating"]:checked');
+  const payload={
+    rating:selected?Number(selected.value):0,
+    category:$("category").value,
+    comments:$("comments").value,
+    email:$("email").value,
+    role,
+    sessionId,
+  };
+  $("submitBtn").disabled=true;
+  $("status").className="status";
+  $("status").textContent="Saving your feedback…";
+  try{
+    const response=await fetch("/api/feedback",{
+      method:"POST",
+      headers:{"content-type":"application/json"},
+      body:JSON.stringify(payload),
+    });
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(result.error||"Feedback could not be saved.");
+    $("formPanel").classList.add("hide");
+    $("successPanel").classList.remove("hide");
+    $("successPanel").focus();
+  }catch(error){
+    $("submitBtn").disabled=false;
+    $("status").className="status error";
+    $("status").textContent=error.message||"Feedback could not be saved. Please try again.";
+  }
+});
+</script>
+</body>
+</html>

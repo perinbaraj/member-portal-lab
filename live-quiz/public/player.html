@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en" data-brand="github">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>GitHub Platform Challenge — Play</title>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--panel-low:#12161d;--inset:#010409;--border:#30363d;--ink:#e6edf3;--sub:#8b949e;
+--green:#3fb950;--green-em:#2ea043;--blue:#58a6ff;--purple:#a371f7;--teal:#39c5cf;--pink:#f778ba;--orange:#db6d28;--red:#f85149;--yellow:#e3b341;
+--accent:#3fb950;--accent-em:#2ea043;--accent-ink:#03130a;--body-glow:#17202b;--card-glow:rgba(0,0,0,.5);
+--brand-gradient:linear-gradient(90deg,#58a6ff,#a371f7,#3fb950,#db6d28);--choice-ink:#0d1117;}
+html[data-brand="microsoft"]{--bg:#071426;--panel:#10233d;--panel-low:#0b1b31;--inset:#06101e;--border:#315274;--ink:#f5f9ff;--sub:#a9bdd2;
+--green:#6ccb5f;--green-em:#57b84b;--blue:#50a7f8;--purple:#b49cff;--teal:#4fd1c5;--pink:#ff8cc6;--orange:#ffb34d;--red:#ff7373;--yellow:#ffd166;
+--accent:#50a7f8;--accent-em:#1688e5;--accent-ink:#041321;--body-glow:#123d68;--card-glow:rgba(0,20,45,.6);
+--brand-gradient:linear-gradient(90deg,#f25022 0 25%,#7fba00 25% 50%,#00a4ef 50% 75%,#ffb900 75%);--choice-ink:#041321;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(700px 400px at 50% -10%,var(--body-glow),var(--bg) 60%);color:var(--ink);
+font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;padding:18px}
+.wrap{width:100%;max-width:520px;margin:auto;display:flex;flex-direction:column;min-height:calc(100vh - 36px)}
+.brand{display:flex;align-items:center;gap:9px;justify-content:center;margin-bottom:6px}
+.brand-logo{width:22px;height:22px;flex:0 0 22px}
+.github-logo{fill:var(--ink)}
+.microsoft-logo{display:none}
+html[data-brand="microsoft"] .github-logo{display:none}
+html[data-brand="microsoft"] .microsoft-logo{display:block}
+.kicker{color:var(--accent);font-weight:800;letter-spacing:.12em;font-size:11px;text-transform:uppercase}
+.card{background:linear-gradient(180deg,var(--panel),var(--panel-low));border:1px solid var(--border);border-radius:18px;padding:26px 22px;
+box-shadow:0 18px 44px var(--card-glow);position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--brand-gradient)}
+h1{font-size:26px;line-height:1.15;margin-bottom:6px;text-align:center}
+h1 .oct{color:var(--accent)}
+.sub{color:var(--sub);font-size:14px;text-align:center;margin-bottom:20px}
+input{width:100%;background:var(--inset);border:1px solid var(--border);color:var(--ink);font-size:18px;padding:15px 16px;border-radius:12px;text-align:center;margin-bottom:14px}
+input:focus{outline:3px solid var(--accent);outline-offset:2px;border-color:var(--accent)}
+.btn{width:100%;border:1px solid var(--accent-em);background:var(--accent-em);color:var(--accent-ink);font-size:18px;font-weight:800;padding:15px;border-radius:12px;cursor:pointer}
+.btn:focus-visible,.abtn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.btn:disabled{opacity:.5}
+.hide{display:none!important}
+.center{flex:1;display:flex;flex-direction:column;justify-content:center}
+.status{text-align:center}
+.status .em{font-size:60px;margin-bottom:12px}
+.status h2{font-size:24px;margin-bottom:6px}
+.status p{color:var(--sub);font-size:15px}
+.me{display:flex;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--border);border-radius:30px;padding:8px 16px;margin-bottom:14px;font-weight:700}
+.me .sc{color:var(--accent)}
+.qmeta{text-align:center;color:var(--sub);font-weight:700;margin-bottom:6px}
+.qtopic{text-align:center;font-weight:800;font-size:15px;margin-bottom:8px;color:var(--blue)}
+#qPrompt{text-align:center;font-size:22px;line-height:1.25;margin-bottom:16px}
+.clock{font:800 34px ui-monospace,Menlo,monospace;text-align:center;color:var(--ink);margin-bottom:10px}
+.tmr{height:8px;background:var(--inset);border-radius:20px;overflow:hidden;margin-bottom:18px}
+.tmr>i{display:block;height:100%;width:100%;background:var(--green);transition:width 1s linear,background .3s}
+.ans{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.abtn{border:none;border-radius:16px;padding:24px 10px;font-size:clamp(16px,5vw,26px);font-weight:900;color:var(--choice-ink);cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center;overflow-wrap:anywhere;transition:transform .08s}
+.abtn:active{transform:scale(.96)}
+.a0{background:var(--blue)}.a1{background:var(--green)}.a2{background:var(--orange)}.a3{background:var(--purple)}
+.a4{background:var(--teal)}.a5{background:var(--pink)}.a6{background:var(--yellow)}.a7{background:var(--red)}
+.abtn:disabled{opacity:.35}
+.tag{position:absolute;top:12px;right:14px;font-size:12px;color:var(--sub)}
+.big{font-size:44px;font-weight:900}
+.rankbig{font-size:30px;font-weight:900;margin:4px 0}
+.podline{color:var(--sub);font-size:15px}
+.player-tools{display:flex;justify-content:flex-end;margin-bottom:6px}
+.feedback-link{color:var(--ink);background:var(--panel);border:1px solid var(--border);
+border-radius:999px;padding:9px 14px;text-decoration:none;font-size:13px;font-weight:800;box-shadow:0 8px 22px var(--card-glow)}
+.feedback-link:hover{border-color:var(--accent);color:var(--accent)}
+.feedback-link:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="player-tools">
+    <a class="feedback-link" id="playerFeedbackLink" href="/feedback.html?role=player" aria-label="Share feedback about this quiz">Feedback</a>
+  </div>
+  <div class="brand">
+    <svg class="brand-logo github-logo" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    <svg class="brand-logo microsoft-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M13 1h10v10H13z"/><path fill="#00a4ef" d="M1 13h10v10H1z"/><path fill="#ffb900" d="M13 13h10v10H13z"/></svg>
+    <span class="kicker" data-brand-text="name">GitHub Platform Challenge</span>
+  </div>
+
+  <!-- JOIN -->
+  <div class="center" id="joinView">
+    <div class="card">
+      <h1>Join the <span class="oct" data-brand-text="shortName">GitHub challenge</span></h1>
+      <p class="sub">Pick a name to appear on the leaderboard.</p>
+      <input id="name" maxlength="20" placeholder="Your name or handle" autocomplete="off"/>
+      <button class="btn" id="joinBtn" onclick="join()">Join game</button>
+      <p class="sub" id="joinErr" style="color:var(--red);margin-top:12px" role="status"></p>
+    </div>
+  </div>
+
+  <!-- WAIT / STATUS -->
+  <div class="center hide" id="statusView">
+    <div class="card status">
+      <div class="em" id="stEm">⏳</div>
+      <h2 id="stTitle">You're in!</h2>
+      <p id="stMsg">Waiting for the host to start…</p>
+    </div>
+  </div>
+
+  <!-- QUESTION -->
+  <div class="center hide" id="qView">
+    <div class="card">
+      <div class="me"><span id="meName">You</span><span class="sc">＋<span id="meScore">0</span> pts</span></div>
+      <div class="qmeta" id="qMeta">Question 1 / 12</div>
+      <div class="qtopic" id="qTopic">Topic</div>
+      <h2 id="qPrompt">Question shown on the host screen</h2>
+      <div class="clock" id="playerClock" role="timer" aria-label="Time remaining">00:20</div>
+      <div class="tmr"><i id="pTimer"></i></div>
+      <div class="ans" id="ansBtns"></div>
+      <p class="sub" id="qHint" style="margin-top:14px">Tap your answer — faster = more points 🔥</p>
+    </div>
+  </div>
+
+  <!-- END -->
+  <div class="center hide" id="endView">
+    <div class="card status">
+      <div class="em" id="endEm">🏅</div>
+      <div class="rankbig" id="endRank">—</div>
+      <div class="big" id="endScore" style="color:var(--accent)">0</div>
+      <p class="podline" id="endMsg">Thanks for playing!</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const s=io();const $=id=>document.getElementById(id);
+let myName="",joined=false,answered=false,tInt=null,hasConnected=false,currentBrand="github";
+const sessionId=new URLSearchParams(location.search).get("session")||"";
+const validSessionId=/^[A-Za-z0-9_-]{20,64}$/.test(sessionId);
+$("playerFeedbackLink").href=`/feedback.html?role=player${validSessionId?`&session=${encodeURIComponent(sessionId)}`:""}`;
+const PLAYER_SESSION_KEY=`liveQuizPlayerSession:${sessionId}`;
+const BRANDS={
+  github:{name:"GitHub Platform Challenge",shortName:"GitHub challenge",title:"GitHub Platform Challenge — Play"},
+  microsoft:{name:"Microsoft Cloud Challenge",shortName:"Microsoft challenge",title:"Microsoft Cloud Challenge — Play"}
+};
+function normalizeBrand(brand){return brand==="microsoft"?"microsoft":"github";}
+function applyBrand(brand){
+  currentBrand=normalizeBrand(brand);
+  document.documentElement.dataset.brand=currentBrand;
+  document.title=BRANDS[currentBrand].title;
+  document.querySelectorAll("[data-brand-text]").forEach(el=>{el.textContent=BRANDS[currentBrand][el.dataset.brandText];});
+}
+function view(v){for(const x of ["joinView","statusView","qView","endView"])$(x).classList.toggle("hide",x!==v);}
+function savedSession(){
+  try{
+    const value=JSON.parse(localStorage.getItem(PLAYER_SESSION_KEY));
+    return value&&value.sessionId===sessionId&&typeof value.token==="string"?value:null;
+  }catch{return null;}
+}
+function saveSession(token,name){
+  try{localStorage.setItem(PLAYER_SESSION_KEY,JSON.stringify({sessionId,token,name}));}catch{}
+}
+function clearSession(){
+  try{localStorage.removeItem(PLAYER_SESSION_KEY);}catch{}
+}
+function restoreIdentity(res){
+  applyBrand(res.brand);
+  joined=true;
+  myName=res.name;
+  answered=Boolean(res.answered);
+  $("meName").textContent=myName;
+  $("meScore").textContent=String(res.score || 0);
+}
+function showWaiting(title,message,emoji="✅"){
+  view("statusView");
+  $("stEm").textContent=emoji;
+  $("stTitle").textContent=title;
+  $("stMsg").textContent=message;
+}
+function resumeSavedSession(){
+  const saved=savedSession();
+  if(!saved || !s.connected)return false;
+  $("joinBtn").disabled=true;
+  $("joinErr").textContent="Restoring your player session…";
+  s.timeout(5000).emit("player:resume",{sessionId,token:saved.token},(err,res)=>{
+    if(!s.connected)return;
+    if(err || !res?.ok){
+      clearSession();
+      joined=false;
+      myName="";
+      answered=false;
+      $("joinBtn").disabled=false;
+      view("joinView");
+      $("joinErr").textContent=err
+        ?"Could not restore your session yet. Reconnect and try again."
+        :res?.error || "Your saved session has expired. Join again.";
+      return;
+    }
+    restoreIdentity(res);
+    if(res.phase==="lobby")showWaiting(`You're back, ${myName}!`,"Waiting for the host to start…","✅");
+    else if(res.phase==="question")showWaiting(`Welcome back, ${myName}!`,"Restoring the current question…","🔄");
+    else if(res.phase==="reveal")showWaiting(`Welcome back, ${myName}!`,"Restoring the latest result…","🔄");
+    else showWaiting(`Welcome back, ${myName}!`,"Restoring the final results…","🔄");
+  });
+  return true;
+}
+
+$("name").addEventListener("keydown",e=>{if(e.key==="Enter")join();});
+function join(){
+  if(!validSessionId){$("joinErr").textContent="This player link is invalid. Ask the host for the current QR code.";return;}
+  if(!s.connected){$("joinErr").textContent="Connecting… Please try again shortly.";return;}
+  const n=$("name").value.trim();if(!n){$("name").focus();return;}
+  $("joinBtn").disabled=true;
+  $("joinErr").textContent="";
+  s.timeout(5000).emit("player:join",{sessionId,name:n},(err,res)=>{
+    if(!s.connected)return;
+    if(!err && res && res.ok){restoreIdentity(res);saveSession(res.reconnectToken,res.name);
+      showWaiting("You're in, "+myName+"!","Waiting for the host to start…");}
+    else{$("joinBtn").disabled=false;$("joinErr").textContent=err?"Join timed out. Try again.":(res&&res.error)||"Could not join.";}
+  });
+}
+
+s.on("connect", ()=>{
+  $("joinBtn").disabled=true;
+  if(!validSessionId){
+    $("joinErr").textContent="This player link is invalid. Ask the host for the current QR code.";
+    return;
+  }
+  s.timeout(5000).emit("session:inspect",sessionId,(err,res)=>{
+    if(!s.connected)return;
+    if(err||!res?.ok){
+      clearSession();
+      $("joinErr").textContent=err?"Could not validate this quiz link. Try again.":res?.error||"This quiz link expired.";
+      return;
+    }
+    applyBrand(res.brand);
+    $("joinBtn").disabled=false;
+    if(resumeSavedSession()){hasConnected=true;return;}
+    if(hasConnected&&!joined)
+      $("joinErr").textContent="Connected. Rejoin now, or wait for the host to restart if the game has started.";
+    hasConnected=true;
+  });
+});
+s.on("disconnect", ()=>{
+  clearInterval(tInt);
+  $("playerClock").textContent="00:00";
+  $("joinBtn").disabled=true;
+  if(savedSession()){
+    showWaiting("Connection lost","Reconnecting automatically… Your score and place are safe.","📡");
+  }else{
+    joined=false;answered=false;myName="";
+    view("joinView");
+    $("joinErr").textContent="Connection lost. Reconnecting…";
+  }
+});
+s.on("session:replaced", ()=>{
+  joined=false;
+  clearInterval(tInt);
+  showWaiting("Session opened elsewhere","This player session is active in another browser tab or device.","⚠️");
+  s.disconnect();
+});
+s.on("admin:disconnected",()=>{
+  clearInterval(tInt);
+  showWaiting("Disconnected by an administrator","You can rejoin this quiz using the same player link.","⚠️");
+  s.disconnect();
+});
+s.on("session:expired",()=>{
+  clearSession();
+  joined=false;
+  view("joinView");
+  $("joinBtn").disabled=true;
+  $("joinErr").textContent="This quiz session expired. Ask the host for a new player link.";
+});
+s.on("public:brand", d=>applyBrand(d?.brand));
+s.on("lobby", d=>applyBrand(d?.brand));
+s.on("question", q=>{
+  applyBrand(q.brand);
+  if(!joined)return;
+  answered=Boolean(q.answered);view("qView");
+  $("qMeta").textContent=`Question ${q.index+1} / ${q.total}`;
+  $("qTopic").textContent=q.topic || "Follow the host screen";
+  $("qPrompt").textContent=q.q || "Question shown on the host screen";
+  $("qHint").textContent="Tap your answer — faster = more points 🔥";$("qHint").style.color="";
+  const labels=["A","B","C","D","E","F","G","H"];
+  $("ansBtns").replaceChildren(...Array.from({length:q.count},(_,i)=>{
+    const button=document.createElement("button");
+    button.className=`abtn a${i}`;
+    button.type="button";
+    button.addEventListener("click",()=>answer(i));
+    const option=Array.isArray(q.o)?q.o[i]:"";
+    button.textContent=option?`${labels[i]} · ${option}`:labels[i];
+    return button;
+  }));
+  if(answered){
+    [...document.querySelectorAll(".abtn")].forEach(button=>{button.disabled=true;});
+    $("qHint").textContent="Your answer is already locked in — hang tight ⏳";
+  }
+  runTimer(q.remainingMs,q.duration);
+});
+function answer(i){
+  if(!joined || !s.connected || answered)return;answered=true;
+  [...document.querySelectorAll('.abtn')].forEach(b=>b.disabled=true);
+  navigator.vibrate&&navigator.vibrate(30);
+  s.timeout(5000).emit("player:answer",i,(err,res)=>{
+    if(!joined || !s.connected)return;
+    $("qHint").textContent=!err && res && res.ok
+      ? "Answer locked in — hang tight ⏳"
+      : "Answer wasn't accepted. Wait for the next question or rejoin after a disconnect.";
+  });
+}
+s.on("reveal", d=>{
+  if(!joined)return;
+  clearInterval(tInt);$("pTimer").style.width="0%";$("playerClock").textContent="00:00";
+  $("meScore").textContent=d.score;
+  view("statusView");
+  if(d.correct){$("stEm").textContent="✅";$("stTitle").textContent="Correct!";}
+  else{$("stEm").textContent="❌";$("stTitle").textContent= answered?"Not this time":"Time's up";}
+  let msg=`You're #${d.rank} of ${d.total} · ${d.score} pts`;
+  if(d.streak>=2&&d.correct)msg+=` · 🔥 ${d.streak} streak`;
+  $("stMsg").textContent=msg;
+});
+s.on("end", d=>{
+  if(!joined)return;
+  view("endView");
+  const medal=d.rank===1?"🥇":d.rank===2?"🥈":d.rank===3?"🥉":"🎖️";
+  $("endEm").textContent=medal;
+  $("endRank").textContent=`#${d.rank} of ${d.total}`;
+  $("endScore").textContent=d.score+" pts";
+  $("endMsg").textContent = d.rank===1?`🎉 You won! Champion of the ${BRANDS[currentBrand].shortName}!`:d.rank<=3?"Podium finish — well played!":"Thanks for playing!";
+});
+s.on("reset", d=>{
+  applyBrand(d?.brand);
+  clearInterval(tInt);
+  $("playerClock").textContent="00:00";
+  $("meScore").textContent="0";
+  if(!joined){
+    view("joinView");
+    $("joinErr").textContent="New round is open. Enter your name and join.";
+    return;
+  }
+  view("statusView");$("stEm").textContent="🔄";$("stTitle").textContent="New round!";
+  $("stMsg").textContent="Waiting for the host to start…";
+});
+
+function runTimer(remainingMs,dur){
+  const bar=$("pTimer"),clock=$("playerClock"),deadline=performance.now()+remainingMs;
+  clearInterval(tInt);
+  function tick(){
+    const left=Math.max(0,deadline-performance.now()),seconds=Math.ceil(left/1000),pct=left/(dur*1000)*100;
+    clock.textContent=`${String(Math.floor(seconds/60)).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}`;
+    bar.style.width=pct+"%";
+    bar.style.background=pct>50?"var(--green)":pct>25?"var(--yellow)":"var(--red)";
+    if(left<=0)clearInterval(tInt);
+  }
+  tick();
+  tInt=setInterval(tick,100);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "live-quiz",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/access-code-repository.test.js tests/audit-event-repository.test.js tests/batch-prompt-builder.test.js tests/batch-text-parser.test.js tests/host-domain-repository.test.js tests/host-email.test.js tests/feedback-repository.test.js tests/quiz-session-repository.test.js tests/integration.test.js",
+    "test:unit": "node --test tests/access-code-repository.test.js tests/audit-event-repository.test.js tests/batch-prompt-builder.test.js tests/batch-text-parser.test.js tests/host-domain-repository.test.js tests/host-email.test.js tests/feedback-repository.test.js tests/quiz-session-repository.test.js",
+    "test:integration": "node --test tests/integration.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@azure/communication-email": "^1.1.0",
+    "@azure/cosmos": "^4.10.1",
+    "@azure/identity": "^4.13.3",
+    "applicationinsights": "^3.16.0",
+    "express": "^5.2.1",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3"
+  }
+}

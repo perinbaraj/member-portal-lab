@@ -1,0 +1,98 @@
+Batch-1
+
+# Refreshed 12\-Question GitHub Quiz
+
+### 1\. GitHub Copilot Inline Suggestions
+
+**Question:** In Visual Studio Code, which key accepts the full inline suggestion displayed by GitHub Copilot?
+
+**Answer:** Tab
+
+---
+
+### 2\. GitHub Copilot Chat
+
+**Question:** Which Copilot Chat slash command can be used to generate unit tests for selected code?
+
+**Answer:** /tests
+
+---
+
+### 3\. GitHub Copilot CLI
+
+**Question:** Which command installs GitHub Copilot CLI using npm?
+
+**Answer:** npm install \-g @github/copilot
+
+---
+
+### 4\. GitHub Copilot CLI
+
+**Question:** Which command starts an interactive GitHub Copilot CLI session?
+
+**Answer:** copilot
+
+---
+
+### 5\. Copilot Cloud Agent
+
+**Question:** What can GitHub Copilot cloud agent do when you delegate a coding task to it?
+
+**Answer:** It can work independently in the background, research the repository, plan the implementation, and make code changes on a branch for review.
+
+---
+
+### 6\. GitHub Actions
+
+**Question:** In which repository directory must GitHub Actions workflow files be stored?
+
+**Answer:** .github/workflows/
+
+---
+
+### 7\. GitHub Actions
+
+**Question:** Which GitHub Actions event allows a workflow to be triggered manually?
+
+**Answer:** workflow\_dispatch
+
+---
+
+### 8\. GitHub Secret Protection
+
+**Question:** What does push protection do?
+
+**Answer:** It detects and blocks supported secrets before they reach the repository.
+
+---
+
+### 9\. GitHub Copilot IDE
+
+**Question:** In Visual Studio Code, which context variable can be used to provide Copilot Chat with codebase context?
+
+**Answer:** \#codebase
+
+---
+
+### 10\. GitHub Copilot Models
+
+**Question:** What option allows GitHub Copilot to automatically choose an appropriate AI model for a task?
+
+**Answer:** Auto model selection
+
+---
+
+### 11\. GitHub Actions
+
+**Question:** What expression references a repository secret named API\_KEY in a GitHub Actions workflow?
+
+**Answer:** $\{\{ secrets.API\_KEY \}\}
+
+---
+
+### 12\. GitHub Enterprise
+
+**Question:** What is the main deployment difference between GitHub Enterprise Cloud (GHEC) and GitHub Enterprise Server (GHES)?
+
+**Answer:** GitHub Enterprise Cloud is hosted by GitHub, while GitHub Enterprise Server is self\-hosted.
+

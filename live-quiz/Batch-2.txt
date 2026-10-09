@@ -1,0 +1,98 @@
+Batch-2 
+
+# GitHub Quiz – Batch 2
+
+### 1\. GitHub Copilot Agent Mode
+
+**Question:** In a supported IDE, which Copilot mode can autonomously determine which files to modify and run commands as it works toward completing a coding task?
+
+**Answer:** Agent mode
+
+---
+
+### 2\. GitHub Copilot Context
+
+**Question:** In Visual Studio Code, which Copilot context variable can be used to explicitly reference a specific file in a prompt?
+
+**Answer:** \#file
+
+---
+
+### 3\. GitHub Copilot Custom Instructions
+
+**Question:** What repository file can be used to provide repository\-wide custom instructions to GitHub Copilot?
+
+**Answer:** .github/copilot\-instructions.md
+
+---
+
+### 4\. GitHub Copilot CLI
+
+**Question:** Which slash command is used to authenticate from within GitHub Copilot CLI when you are not already signed in?
+
+**Answer:** /login
+
+---
+
+### 5\. GitHub Copilot Cloud Agent
+
+**Question:** What type of development environment does Copilot cloud agent use while working on an assigned coding task?
+
+**Answer:** Its own ephemeral development environment powered by GitHub Actions.
+
+---
+
+### 6\. GitHub Actions
+
+**Question:** Which GitHub Actions keyword defines the events that trigger a workflow?
+
+**Answer:** on
+
+---
+
+### 7\. GitHub Actions
+
+**Question:** Which GitHub Actions event is commonly used to run a workflow when code is pushed to a repository?
+
+**Answer:** push
+
+---
+
+### 8\. GitHub Actions
+
+**Question:** Which GitHub Actions context provides information about the workflow run and the event that triggered it?
+
+**Answer:** github
+
+---
+
+### 9\. GitHub Code Security
+
+**Question:** Which GitHub security capability analyzes source code to identify potential security vulnerabilities and coding errors?
+
+**Answer:** Code scanning
+
+---
+
+### 10\. GitHub Code Security
+
+**Question:** Which GitHub feature identifies known vulnerable dependencies used by a repository?
+
+**Answer:** Dependabot alerts
+
+---
+
+### 11\. GitHub Secret Protection
+
+**Question:** If push protection detects a supported secret during a push, what happens by default?
+
+**Answer:** The push is blocked so the secret does not reach the protected repository.
+
+---
+
+### 12\. GitHub Pull Requests
+
+**Question:** Which GitHub feature can require specified conditions, such as approving reviews or passing status checks, before changes can be merged into a protected branch?
+
+**Answer:** Branch protection rules
+

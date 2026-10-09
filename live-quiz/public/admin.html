@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Live Quiz · Administration</title>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--panel2:#10151c;--inset:#010409;--border:#30363d;--ink:#e6edf3;--sub:#8b949e;
+--green:#3fb950;--blue:#58a6ff;--yellow:#e3b341;--orange:#db6d28;--red:#f85149;--purple:#a371f7;--button:#21262d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(1100px 600px at 50% -10%,#17202b,var(--bg) 65%);color:var(--ink);
+font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;min-height:100vh}
+button,input,select,textarea{font:inherit}.hide{display:none!important}
+.login-shell{min-height:100vh;display:grid;place-items:center;padding:24px}.login-card,.panel{background:linear-gradient(180deg,var(--panel),var(--panel2));
+border:1px solid var(--border);border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.login-card{width:min(460px,100%);padding:32px;position:relative;overflow:hidden}.login-card::before,.panel::before{content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,var(--blue),var(--purple),var(--green))}
+h1,h2,h3,p{margin-top:0}.sub{color:var(--sub);line-height:1.5}.field{display:grid;gap:7px;margin:16px 0;font-weight:700}
+.field span{color:var(--sub);font-size:14px}.field input,.field select,.field textarea,.filter{width:100%;background:var(--inset);color:var(--ink);
+border:1px solid var(--border);border-radius:9px;padding:11px}.field textarea{min-height:100px;resize:vertical}
+.btn{appearance:none;border:1px solid var(--border);background:var(--button);color:var(--ink);border-radius:9px;padding:10px 14px;font-weight:750;cursor:pointer}
+.btn:hover{border-color:var(--sub)}.btn.primary{background:#238636;border-color:#2ea043}.btn.danger{background:#3d1519;border-color:#8b2d35;color:#ffb3b8}
+.btn.small{padding:6px 9px;font-size:13px}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[role=tab]:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.status{min-height:22px;color:var(--yellow);font-weight:700}.error{color:var(--red)}.success{color:var(--green)}
+.app{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}.sidebar{background:#0b0f14;border-right:1px solid var(--border);padding:22px 16px;
+position:sticky;top:0;height:100vh;overflow:auto}.brand{font-weight:900;font-size:18px;margin:0 8px 18px}.brand small{display:block;color:var(--sub);font-size:11px;
+letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px}.operator{margin:0 8px 18px;padding:10px;border:1px solid var(--border);border-radius:10px;color:var(--sub);font-size:13px}
+.operator b{display:block;color:var(--ink);margin-bottom:3px}.tabs{display:grid;gap:5px}.tab{appearance:none;text-align:left;border:0;background:transparent;color:var(--sub);
+padding:10px 12px;border-radius:9px;font-weight:750;cursor:pointer}.tab[aria-selected=true]{background:var(--button);color:var(--ink)}.tab:hover{color:var(--ink)}
+.sidebar-actions{margin-top:18px;padding-top:16px;border-top:1px solid var(--border);display:grid;gap:8px}
+.content{padding:24px 28px 40px;min-width:0}.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:20px}
+.topbar h1{font-size:30px;margin-bottom:5px}.live{display:inline-flex;align-items:center;gap:7px;color:var(--sub);font-size:13px}.live i{width:9px;height:9px;border-radius:50%;background:var(--green)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:14px;margin-bottom:18px}.metric{position:relative;overflow:hidden;padding:18px}.metric .label{color:var(--sub);
+font-size:13px;font-weight:700}.metric .value{font-size:32px;font-weight:900;margin:7px 0 2px}.metric .detail{color:var(--sub);font-size:12px}
+.panel{position:relative;overflow:hidden;padding:18px;margin-bottom:18px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+.panel-head h2{font-size:20px;margin:0}.toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.toolbar .filter{width:auto;min-width:150px}
+.table-wrap{overflow:auto;border:1px solid var(--border);border-radius:11px}table{width:100%;border-collapse:collapse;min-width:720px}th,td{padding:10px 12px;text-align:left;
+border-bottom:1px solid var(--border);vertical-align:top}th{position:sticky;top:0;background:#111720;color:var(--sub);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+tr:last-child td{border-bottom:0}.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px}.muted{color:var(--sub)}.actions{display:flex;flex-wrap:wrap;gap:6px}
+.badge{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;padding:3px 8px;font-size:12px;font-weight:800}.badge.green{color:var(--green)}
+.badge.yellow{color:var(--yellow)}.badge.red{color:var(--red)}.badge.blue{color:var(--blue)}.badge.purple{color:var(--purple)}
+.empty{text-align:center;color:var(--sub);padding:28px}.pager{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:12px;color:var(--sub);font-size:13px}
+.access-grid,.export-grid{display:grid;grid-template-columns:minmax(260px,.7fr) minmax(300px,1fr);gap:18px}.code-panel{background:var(--inset);border:1px solid var(--border);
+border-radius:12px;padding:20px}.code{font:900 40px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;color:var(--green);margin:12px 0}
+.code-warning{color:var(--yellow);font-size:13px}.log-detail{max-width:420px;white-space:normal;overflow-wrap:anywhere}
+dialog{width:min(520px,calc(100% - 32px));border:1px solid var(--border);border-radius:16px;background:var(--panel);color:var(--ink);padding:0;box-shadow:0 30px 80px #000}
+dialog::backdrop{background:rgba(0,0,0,.75)}.dialog-body{padding:24px}.dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+.drawer{position:fixed;inset:0 0 0 auto;width:min(640px,100%);z-index:30;background:var(--panel);border-left:1px solid var(--border);box-shadow:-20px 0 60px #000;
+padding:24px;overflow:auto}.drawer-head{display:flex;justify-content:space-between;gap:15px;margin-bottom:18px}.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.detail-item{background:var(--inset);border:1px solid var(--border);border-radius:9px;padding:10px}.detail-item span{display:block;color:var(--sub);font-size:12px;margin-bottom:4px}
+@media(max-width:980px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid var(--border)}.tabs{grid-template-columns:repeat(4,1fr)}
+.sidebar-actions{grid-template-columns:1fr 1fr}.cards{grid-template-columns:repeat(2,1fr)}.access-grid,.export-grid{grid-template-columns:1fr}}
+@media(max-width:620px){.content{padding:18px 14px 32px}.tabs{grid-template-columns:repeat(2,1fr)}.cards{grid-template-columns:1fr}.topbar,.panel-head{align-items:stretch;flex-direction:column}
+.toolbar{display:grid;grid-template-columns:1fr}.toolbar .filter{width:100%}.detail-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<section class="login-shell" id="loginView">
+  <div class="login-card">
+    <h1>Quiz administration</h1>
+    <p class="sub">Restricted operational dashboard. Every action is recorded with your operator name.</p>
+    <form id="loginForm">
+      <label class="field"><span>Operator name</span><input id="operatorName" maxlength="80" autocomplete="name" required/></label>
+      <label class="field"><span>Admin passphrase</span><input id="adminPassphrase" type="password" maxlength="1024" autocomplete="current-password" required/></label>
+      <div class="status" id="loginStatus" role="alert"></div>
+      <button class="btn primary" id="loginBtn" type="submit">Sign in</button>
+    </form>
+  </div>
+</section>
+
+<div class="app hide" id="adminView">
+  <aside class="sidebar">
+    <div class="brand"><small>Solution Engineer Quiz</small>Administration</div>
+    <div class="operator"><b id="operatorDisplay">Operator</b><span id="sessionExpiry"></span></div>
+    <nav class="tabs" aria-label="Admin sections">
+      <button class="tab" role="tab" data-view="overview" aria-selected="true">Overview</button>
+      <button class="tab" role="tab" data-view="hosts" aria-selected="false">Hosts</button>
+      <button class="tab" role="tab" data-view="sessions" aria-selected="false">Sessions</button>
+      <button class="tab" role="tab" data-view="participants" aria-selected="false">Participants</button>
+      <button class="tab" role="tab" data-view="logs" aria-selected="false">Logs</button>
+      <button class="tab" role="tab" data-view="domains" aria-selected="false">Host domains</button>
+      <button class="tab" role="tab" data-view="access" aria-selected="false">Access codes</button>
+      <button class="tab" role="tab" data-view="feedback" aria-selected="false">Feedback</button>
+      <button class="tab" role="tab" data-view="exports" aria-selected="false">Exports</button>
+    </nav>
+    <div class="sidebar-actions">
+      <button class="btn" id="refreshBtn" type="button">Refresh</button>
+      <button class="btn" id="logoutBtn" type="button">Sign out</button>
+    </div>
+  </aside>
+  <main class="content">
+    <header class="topbar">
+      <div><h1 id="viewTitle">Overview</h1><div class="live"><i></i><span id="liveStatus">Connecting to live updates…</span></div></div>
+      <div class="status" id="globalStatus" role="status" aria-live="polite"></div>
+    </header>
+
+    <section id="overviewView" data-panel="overview">
+      <div class="cards" id="overviewCards"></div>
+      <div class="panel"><div class="panel-head"><h2>Recent operational events</h2></div><div id="recentEvents"></div></div>
+    </section>
+    <section class="hide" id="hostsView" data-panel="hosts"><div class="panel"><div class="panel-head"><h2>Hosts</h2><div class="toolbar"><input class="filter" id="hostSearch" placeholder="Search email or host ID"/></div></div><div id="hostsTable"></div></div></section>
+    <section class="hide" id="sessionsView" data-panel="sessions"><div class="panel"><div class="panel-head"><h2>Active quiz sessions</h2><div class="toolbar"><select class="filter" id="sessionPhase"><option value="">All phases</option><option>lobby</option><option>question</option><option>reveal</option><option>end</option></select><input class="filter" id="sessionSearch" placeholder="Search session or host"/></div></div><div id="sessionsTable"></div></div></section>
+    <section class="hide" id="participantsView" data-panel="participants"><div class="panel"><div class="panel-head"><h2>Participants</h2><div class="toolbar"><input class="filter" id="participantSearch" placeholder="Search participant or session"/></div></div><div id="participantsTable"></div></div></section>
+    <section class="hide" id="logsView" data-panel="logs"><div class="panel"><div class="panel-head"><h2>Audit and activity logs</h2><div class="toolbar"><select class="filter" id="logCategory"><option value="">All categories</option><option>admin</option><option>auth</option><option>session</option><option>participant</option><option>feedback</option><option>export</option></select><input class="filter" id="logSearch" placeholder="Search actions or identities"/></div></div><div id="logsTable"></div></div></section>
+    <section class="hide" id="domainsView" data-panel="domains">
+      <div class="access-grid">
+        <div class="panel">
+          <h2>Add partner host domain</h2>
+          <p class="sub">Hosts can request access codes only from exact allowed domains. Subdomains are not included automatically.</p>
+          <form id="domainForm">
+            <label class="field"><span>Email domain</span><input id="domainName" type="text" maxlength="128" autocomplete="off" placeholder="partner.com" required/></label>
+            <label class="field"><span>Reason</span><textarea id="domainReason" maxlength="300" required placeholder="Partner workshop access"></textarea></label>
+            <div class="status" id="domainStatus" role="alert"></div>
+            <button class="btn primary" type="submit">Allow partner domain</button>
+          </form>
+        </div>
+        <div class="panel">
+          <h2>Allowed host domains</h2>
+          <p class="sub">GitHub and Microsoft are protected defaults. Removing a partner domain blocks new authentication but does not stop active quiz sessions.</p>
+          <div id="domainsTable"></div>
+        </div>
+      </div>
+    </section>
+    <section class="hide" id="accessView" data-panel="access">
+      <div class="access-grid">
+        <div class="panel"><h2>Generate host access code</h2><p class="sub">Creates a single-use code tied to one allowed work email. Leave the expiration blank to use the default 10-minute window.</p>
+          <form id="accessForm"><label class="field"><span>Host email</span><input id="accessEmail" type="email" autocomplete="off" placeholder="name@allowed-company.com" required/></label>
+          <label class="field"><span>Support reason</span><textarea id="accessReason" maxlength="300" required></textarea></label>
+          <label class="field"><span>Expiration (minutes)</span><input id="accessExpiryMinutes" type="number" min="1" max="1440" step="1" placeholder="10" /></label>
+          <div class="status" id="accessStatus" role="alert"></div><button class="btn primary" type="submit">Generate single-use code</button></form>
+        </div>
+        <div class="panel"><h2>One-time result</h2><div class="code-panel" id="codePanel"><p class="muted">Generate a code to display it here once.</p></div></div>
+      </div>
+    </section>
+    <section class="hide" id="feedbackView" data-panel="feedback"><div class="panel"><div class="panel-head"><h2>Feedback</h2><div class="toolbar"><select class="filter" id="feedbackStatus"><option value="">All statuses</option><option>new</option><option>reviewed</option><option>resolved</option></select><input class="filter" id="feedbackSearch" placeholder="Search category, comments, or email"/></div></div><div id="feedbackTable"></div></div></section>
+    <section class="hide" id="exportsView" data-panel="exports"><div class="export-grid">
+      <div class="panel"><h2>Export operational data</h2><form id="exportForm"><label class="field"><span>Resource</span><select id="exportResource"><option value="sessions">Sessions</option><option value="participants">Participants</option><option value="logs">Audit logs</option><option value="feedback">Feedback</option></select></label>
+      <label class="field"><span>Format</span><select id="exportFormat"><option value="csv">CSV</option><option value="json">JSON</option></select></label>
+      <button class="btn primary" type="submit">Download export</button></form></div>
+      <div class="panel"><h2>Privacy boundary</h2><p class="sub">Exports use the same sanitized projections as this dashboard. They never include access codes, OTPs, cookies, CSRF tokens, reconnect tokens, socket IDs, secret hashes, or individual answers.</p></div>
+    </div></section>
+  </main>
+</div>
+
+<dialog id="actionDialog" aria-labelledby="dialogTitle">
+  <form method="dialog" class="dialog-body" id="actionForm">
+    <h2 id="dialogTitle">Confirm action</h2><p class="sub" id="dialogMessage"></p>
+    <label class="field"><span>Reason</span><textarea id="actionReason" maxlength="300" required></textarea></label>
+    <div class="status" id="dialogStatus" role="alert"></div>
+    <div class="dialog-actions"><button class="btn" value="cancel">Cancel</button><button class="btn danger" id="confirmActionBtn" value="default">Confirm</button></div>
+  </form>
+</dialog>
+<aside class="drawer hide" id="sessionDrawer" aria-label="Session details"></aside>
+
+<script>
+const $=id=>document.getElementById(id);
+let csrfToken="",operatorName="",expiresAt=0,currentView="overview",socket=null,pendingAction=null;
+const titles={overview:"Overview",hosts:"Hosts",sessions:"Sessions",participants:"Participants",logs:"Logs",domains:"Host domains",access:"Access codes",feedback:"Feedback",exports:"Exports"};
+const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+const fmt=value=>value?new Date(value).toLocaleString():"—";
+function badge(value){const text=String(value||"unknown"),color=/connected|active|reviewed|lobby/.test(text)?"green":/question|reveal|new/.test(text)?"yellow":/expired|error|failed/.test(text)?"red":"blue";return `<span class="badge ${color}">${escapeHtml(text)}</span>`;}
+async function api(path,options={}){
+  const headers={...(options.headers||{})};if(options.body&&!headers["content-type"])headers["content-type"]="application/json";
+  if(!["GET","HEAD"].includes((options.method||"GET").toUpperCase())&&csrfToken)headers["x-admin-csrf"]=csrfToken;
+  const response=await fetch(path,{...options,headers,credentials:"same-origin",cache:"no-store"});
+  const contentType=response.headers.get("content-type")||"";
+  const result=contentType.includes("application/json")?await response.json():await response.text();
+  if(response.status===401){showLogin("Your admin session expired. Sign in again.");throw new Error("Admin session expired.");}
+  if(!response.ok)throw new Error(result?.error||`Request failed (${response.status}).`);
+  return result;
+}
+function showLogin(message=""){
+  csrfToken="";operatorName="";expiresAt=0;socket?.disconnect();socket=null;
+  $("adminView").classList.add("hide");$("loginView").classList.remove("hide");$("loginStatus").textContent=message;$("adminPassphrase").value="";
+}
+function showAdmin(session){
+  operatorName=session.operatorName;expiresAt=session.expiresAt;csrfToken=session.csrfToken||csrfToken;
+  $("operatorDisplay").textContent=operatorName;$("sessionExpiry").textContent=`Session expires ${fmt(expiresAt)}`;
+  $("loginView").classList.add("hide");$("adminView").classList.remove("hide");connectLive();selectView(currentView);
+}
+$("loginForm").addEventListener("submit",async event=>{
+  event.preventDefault();$("loginBtn").disabled=true;$("loginStatus").textContent="Signing in…";
+  try{const result=await api("/api/admin/login",{method:"POST",body:JSON.stringify({operatorName:$("operatorName").value,passphrase:$("adminPassphrase").value})});showAdmin(result);}
+  catch(error){$("loginStatus").textContent=error.message;$("loginStatus").className="status error";}finally{$("loginBtn").disabled=false;}
+});
+$("logoutBtn").addEventListener("click",async()=>{try{await api("/api/admin/logout",{method:"POST"});}catch{}showLogin("Signed out.");});
+$("refreshBtn").addEventListener("click",()=>loadView(currentView,true));
+document.querySelectorAll(".tab").forEach(button=>button.addEventListener("click",()=>selectView(button.dataset.view)));
+function selectView(view){
+  currentView=view;$("viewTitle").textContent=titles[view];
+  document.querySelectorAll("[data-panel]").forEach(panel=>panel.classList.toggle("hide",panel.dataset.panel!==view));
+  document.querySelectorAll(".tab").forEach(tab=>tab.setAttribute("aria-selected",tab.dataset.view===view?"true":"false"));
+  loadView(view);
+}
+function table(headers,rows){
+  if(!rows.length)return `<div class="empty">No matching records.</div>`;
+  return `<div class="table-wrap"><table><thead><tr>${headers.map(h=>`<th>${escapeHtml(h)}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+}
+async function loadView(view,announce=false){
+  try{
+    if(announce)$("globalStatus").textContent="Refreshing…";
+    if(view==="overview")await loadOverview();
+    if(view==="hosts")await loadHosts();
+    if(view==="sessions")await loadSessions();
+    if(view==="participants")await loadParticipants();
+    if(view==="logs")await loadLogs();
+    if(view==="domains")await loadDomains();
+    if(view==="feedback")await loadFeedback();
+    if(announce)$("globalStatus").textContent="Updated.";
+  }catch(error){$("globalStatus").textContent=error.message;$("globalStatus").className="status error";}
+}
+async function loadOverview(){
+  const data=await api("/api/admin/overview");
+  const metrics=[["Connected hosts",data.connectedHosts,`${data.knownHosts} known in active sessions`],["Active sessions",data.activeSessions,`${data.sessionsByPhase?.question||0} answering now`],
+    ["Connected participants",data.connectedParticipants,`${data.totalParticipants} total retained`],["New feedback",data.newFeedback,`${data.totalFeedback} total submissions`],
+    ["Active manual codes",data.activeAccessCodes,"Single-use support codes"],["Recent warnings/errors",data.recentIssues,"Last 24 hours"]];
+  $("overviewCards").innerHTML=metrics.map(([label,value,detail])=>`<div class="panel metric"><div class="label">${label}</div><div class="value">${Number(value)||0}</div><div class="detail">${escapeHtml(detail)}</div></div>`).join("");
+  $("recentEvents").innerHTML=renderLogs(data.recentEvents||[]);
+}
+async function loadHosts(){const q=new URLSearchParams({search:$("hostSearch").value,pageSize:"200"});const data=await api(`/api/admin/hosts?${q}`);$("hostsTable").innerHTML=table(["Host","Connected","Sessions","Phases","Last activity"],data.items.map(h=>`<tr><td><b>${escapeHtml(h.email||"Emergency host")}</b><div class="mono muted">${escapeHtml(h.hostId)}</div></td><td>${badge(h.connected?"connected":"offline")}</td><td>${h.sessionCount}</td><td>${(h.phases||[]).map(badge).join(" ")}</td><td>${fmt(h.lastActivityAt)}</td></tr>`));}
+async function loadSessions(){const q=new URLSearchParams({search:$("sessionSearch").value,phase:$("sessionPhase").value,pageSize:"200"});const data=await api(`/api/admin/sessions?${q}`);$("sessionsTable").innerHTML=table(["Session","Host","State","Participants","Batch","Activity","Actions"],data.items.map(s=>`<tr><td><button class="btn small" data-detail="${escapeHtml(s.id)}">${escapeHtml(s.id.slice(0,8))}…</button></td><td>${escapeHtml(s.hostEmail||"Emergency host")}</td><td>${badge(s.phase)}<div class="muted">${escapeHtml(s.brand)}</div></td><td>${s.connectedParticipants} / ${s.totalParticipants}</td><td>${escapeHtml(s.batchLabel||"Not selected")}</td><td>${fmt(s.lastActivityAt)}</td><td><div class="actions"><button class="btn small" data-admin-action="reset" data-session="${escapeHtml(s.id)}">Reset</button><button class="btn small danger" data-admin-action="expire" data-session="${escapeHtml(s.id)}">Expire</button></div></td></tr>`));bindActions();}
+async function loadParticipants(){const q=new URLSearchParams({search:$("participantSearch").value,pageSize:"200"});const data=await api(`/api/admin/participants?${q}`);$("participantsTable").innerHTML=table(["Participant","Session","Score","Connection","Joined","Actions"],data.items.map(p=>`<tr><td><b>${escapeHtml(p.name)}</b></td><td class="mono">${escapeHtml(p.sessionId.slice(0,10))}…</td><td>${p.score}</td><td>${badge(p.connected?"connected":"offline")}</td><td>${fmt(p.joinedAt)}</td><td><button class="btn small danger" data-admin-action="disconnect" data-session="${escapeHtml(p.sessionId)}" data-player="${escapeHtml(p.id)}" ${p.connected?"":"disabled"}>Disconnect</button></td></tr>`));bindActions();}
+function renderLogs(items){return table(["Time","Category","Action","Actor","Outcome","Details"],items.map(e=>`<tr><td>${fmt(e.createdAt)}</td><td>${badge(e.category)}</td><td>${escapeHtml(e.action)}</td><td>${escapeHtml(e.operatorName||e.actorId||e.actorType||"system")}</td><td>${badge(e.outcome)}</td><td class="mono log-detail">${escapeHtml(JSON.stringify(e.details||{}))}</td></tr>`));}
+async function loadLogs(){const q=new URLSearchParams({search:$("logSearch").value,category:$("logCategory").value,pageSize:"200"});const data=await api(`/api/admin/logs?${q}`);$("logsTable").innerHTML=renderLogs(data.items);}
+async function loadDomains(){
+  const data=await api("/api/admin/host-domains");
+  const protectedRows=(data.protectedDomains||[]).map(domain=>`<tr><td><b>${escapeHtml(domain)}</b></td><td>${badge("protected")}</td><td>Always allowed</td></tr>`);
+  const partnerRows=(data.partnerDomains||[]).map(domain=>`<tr><td><b>${escapeHtml(domain)}</b></td><td>${badge("partner")}</td><td><button class="btn small danger" data-remove-domain="${escapeHtml(domain)}">Remove</button></td></tr>`);
+  $("domainsTable").innerHTML=table(["Domain","Type","Action"],[...protectedRows,...partnerRows]);
+  document.querySelectorAll("[data-remove-domain]").forEach(button=>button.addEventListener("click",()=>removeDomain(button.dataset.removeDomain)));
+}
+async function removeDomain(domain){
+  const reason=prompt(`Reason for removing ${domain}:`,"");
+  if(reason===null)return;
+  if(!reason.trim()){ $("domainStatus").textContent="Enter a reason before removing a domain."; return; }
+  if(!confirm(`Remove ${domain}? New host authentication from this domain will be blocked.`))return;
+  try{
+    await api(`/api/admin/host-domains/${encodeURIComponent(domain)}`,{method:"DELETE",body:JSON.stringify({reason})});
+    $("domainStatus").textContent=`${domain} removed. Existing quiz sessions remain active.`;
+    await loadDomains();
+  }catch(error){$("domainStatus").textContent=error.message;}
+}
+$("domainForm").addEventListener("submit",async event=>{
+  event.preventDefault();$("domainStatus").textContent="Adding domain…";
+  try{
+    const result=await api("/api/admin/host-domains",{method:"POST",body:JSON.stringify({domain:$("domainName").value,reason:$("domainReason").value})});
+    $("domainName").value="";$("domainReason").value="";
+    $("domainStatus").textContent=`${result.domain} can now request host access.`;
+    await loadDomains();
+  }catch(error){$("domainStatus").textContent=error.message;}
+});
+async function loadFeedback(){const q=new URLSearchParams({search:$("feedbackSearch").value,status:$("feedbackStatus").value,pageSize:"200"});const data=await api(`/api/admin/feedback?${q}`);$("feedbackTable").innerHTML=table(["Submitted","Rating","Category","Comments","Contact","Status","Actions"],data.items.map(f=>`<tr><td>${fmt(f.createdAt)}</td><td>${f.rating}/5</td><td>${escapeHtml(f.category)}</td><td>${escapeHtml(f.comments)}</td><td>${escapeHtml(f.email||"—")}</td><td>${badge(f.status)}</td><td><div class="actions"><button class="btn small" data-feedback="${escapeHtml(f.id)}" data-status="reviewed" data-revision="${f.revision}">Reviewed</button><button class="btn small primary" data-feedback="${escapeHtml(f.id)}" data-status="resolved" data-revision="${f.revision}">Resolve</button></div></td></tr>`));document.querySelectorAll("[data-feedback]").forEach(button=>button.addEventListener("click",()=>moderateFeedback(button)));}
+async function moderateFeedback(button){const note=prompt(`Internal note for ${button.dataset.status} (optional):`,"");if(note===null)return;try{await api(`/api/admin/feedback/${encodeURIComponent(button.dataset.feedback)}`,{method:"PATCH",body:JSON.stringify({status:button.dataset.status,internalNote:note,expectedRevision:Number(button.dataset.revision)})});await loadFeedback();}catch(error){$("globalStatus").textContent=error.message;}}
+for(const id of ["hostSearch","sessionSearch","participantSearch","logSearch","feedbackSearch"])$(id).addEventListener("input",()=>{clearTimeout($(id)._timer);$(id)._timer=setTimeout(()=>loadView(currentView),250);});
+for(const id of ["sessionPhase","logCategory","feedbackStatus"])$(id).addEventListener("change",()=>loadView(currentView));
+function bindActions(){
+  document.querySelectorAll("[data-detail]").forEach(button=>button.addEventListener("click",()=>showSession(button.dataset.detail)));
+  document.querySelectorAll("[data-admin-action]").forEach(button=>button.addEventListener("click",()=>openAction(button.dataset.adminAction,button.dataset.session,button.dataset.player||"")));
+}
+async function showSession(id){try{const data=await api(`/api/admin/sessions/${encodeURIComponent(id)}`);$("sessionDrawer").innerHTML=`<div class="drawer-head"><div><h2>Session details</h2><div class="mono">${escapeHtml(id)}</div></div><button class="btn" id="closeDrawer">Close</button></div><div class="detail-grid">${Object.entries({Host:data.session.hostEmail||"Emergency host",Phase:data.session.phase,Brand:data.session.brand,Batch:data.session.batchLabel||"Not selected",Participants:`${data.session.connectedParticipants} / ${data.session.totalParticipants}`,Created:fmt(data.session.createdAt),Activity:fmt(data.session.lastActivityAt),Expires:fmt(data.session.expiresAt)}).map(([k,v])=>`<div class="detail-item"><span>${k}</span>${escapeHtml(v)}</div>`).join("")}</div><h3 style="margin-top:22px">Participants</h3>${table(["Name","Score","Connection","Joined"],data.participants.map(p=>`<tr><td>${escapeHtml(p.name)}</td><td>${p.score}</td><td>${badge(p.connected?"connected":"offline")}</td><td>${fmt(p.joinedAt)}</td></tr>`))}<h3 style="margin-top:22px">Recent events</h3>${renderLogs(data.events||[])}`;$("sessionDrawer").classList.remove("hide");$("closeDrawer").addEventListener("click",()=>$("sessionDrawer").classList.add("hide"));}catch(error){$("globalStatus").textContent=error.message;}}
+function openAction(action,sessionId,playerId){pendingAction={action,sessionId,playerId};$("dialogTitle").textContent={reset:"Reset quiz session",expire:"Expire quiz session",disconnect:"Disconnect participant"}[action];$("dialogMessage").textContent={reset:"Return this quiz to the lobby and clear current scores?",expire:"Immediately expire this session and disconnect its host and participants?",disconnect:"Disconnect this participant while preserving their ability to reconnect?"}[action];$("actionReason").value="";$("dialogStatus").textContent="";$("actionDialog").showModal();$("actionReason").focus();}
+$("actionForm").addEventListener("submit",async event=>{if(event.submitter?.value==="cancel"){pendingAction=null;return;}event.preventDefault();const reason=$("actionReason").value.trim();if(!reason){$("dialogStatus").textContent="Enter a reason.";return;}const {action,sessionId,playerId}=pendingAction;let path=`/api/admin/sessions/${encodeURIComponent(sessionId)}/${action}`;if(action==="disconnect")path=`/api/admin/sessions/${encodeURIComponent(sessionId)}/participants/${encodeURIComponent(playerId)}/disconnect`;try{await api(path,{method:"POST",body:JSON.stringify({reason})});$("actionDialog").close();pendingAction=null;await loadView(currentView,true);}catch(error){$("dialogStatus").textContent=error.message;}});
+$("accessForm").addEventListener("submit",async event=>{event.preventDefault();$("accessStatus").textContent="Generating…";const rawMinutes=$("accessExpiryMinutes").value.trim();const expiryMinutes=rawMinutes===""?null:Number(rawMinutes);if(expiryMinutes!==null && (!Number.isInteger(expiryMinutes)||expiryMinutes<1||expiryMinutes>1440)){ $("accessStatus").textContent="Choose an expiration between 1 and 1440 whole minutes."; return; } try{const payload={email:$("accessEmail").value,reason:$("accessReason").value};if(expiryMinutes!==null)payload.expiresMinutes=expiryMinutes;const result=await api("/api/admin/access-codes",{method:"POST",body:JSON.stringify(payload)});$("codePanel").innerHTML=`<div class="muted">${escapeHtml(result.email)}</div><div class="code">${escapeHtml(result.code)}</div><button class="btn" id="copyCode">Copy code</button><p class="code-warning">Visible once. Expires ${fmt(result.expiresAt)} and can be used only one time.</p>`;$("copyCode").addEventListener("click",()=>navigator.clipboard.writeText(result.code));$("accessStatus").textContent="Code generated and audited.";}catch(error){$("accessStatus").textContent=error.message;}});
+$("exportForm").addEventListener("submit",async event=>{event.preventDefault();const resource=$("exportResource").value,format=$("exportFormat").value;try{const response=await fetch(`/api/admin/export?resource=${encodeURIComponent(resource)}&format=${encodeURIComponent(format)}`,{credentials:"same-origin",cache:"no-store"});if(response.status===401){showLogin("Your admin session expired. Sign in again.");return;}if(!response.ok){const result=await response.json();throw new Error(result.error||"Export failed.");}const blob=await response.blob(),url=URL.createObjectURL(blob),link=document.createElement("a");link.href=url;link.download=(response.headers.get("content-disposition")||"").match(/filename=\"?([^\";]+)/)?.[1]||`quiz-${resource}.${format}`;link.click();URL.revokeObjectURL(url);}catch(error){$("globalStatus").textContent=error.message;}});
+function connectLive(){socket?.disconnect();socket=io({transports:["websocket"]});socket.on("connect",()=>socket.emit("admin:subscribe",{},result=>{if(result?.ok){$("liveStatus").textContent="Live updates connected";}else{$("liveStatus").textContent=result?.error||"Live updates unavailable";}}));socket.on("admin:update",()=>loadView(currentView));socket.on("admin:session-expired",()=>showLogin("Your admin session expired. Sign in again."));socket.on("disconnect",()=>{$("liveStatus").textContent="Live updates reconnecting…";});}
+(async()=>{try{const me=await api("/api/admin/me");showAdmin(me);}catch{showLogin();}})();
+</script>
+</body>
+</html>

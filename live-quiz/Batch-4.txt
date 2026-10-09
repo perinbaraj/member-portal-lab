@@ -1,0 +1,96 @@
+# GitHub Copilot Quiz – Batch 4
+
+### 1\. Copilot Spaces
+
+**Question:** What GitHub Copilot feature lets you organize repositories, files, issues, pull requests, and other relevant content into a curated context for Copilot?
+
+**Answer:** GitHub Copilot Spaces
+
+---
+
+### 2\. Copilot Spaces
+
+**Question:** What are the two main types of context you can add when creating a GitHub Copilot Space?
+
+**Answer:** Instructions and sources
+
+---
+
+### 3\. Copilot Spaces
+
+**Question:** When GitHub files added to a Copilot Space change, does the Space require you to manually upload the latest versions?
+
+**Answer:** No. GitHub\-based sources added to a Space are automatically updated as they change.
+
+---
+
+### 4\. Copilot Memory
+
+**Question:** What GitHub Copilot feature can remember useful facts about repositories and personal coding preferences across interactions?
+
+**Answer:** GitHub Copilot Memory
+
+---
+
+### 5\. Copilot Memory
+
+**Question:** What are the two types of information that GitHub Copilot Memory can store?
+
+**Answer:** Repository\-level facts and user\-level preferences
+
+---
+
+### 6\. Copilot Memory
+
+**Question:** Name two examples of repository\-level information that Copilot Memory can retain.
+
+**Answer:** Examples include coding conventions, architectural decisions, build commands, and project\-specific rules.
+
+---
+
+### 7\. Copilot Custom Instructions
+
+**Question:** Where are path\-specific GitHub Copilot custom instruction files stored in a repository?
+
+**Answer:** .github/instructions/
+
+---
+
+### 8\. Copilot Custom Instructions
+
+**Question:** What filename pattern is used for path\-specific GitHub Copilot instruction files?
+
+**Answer:** NAME.instructions.md
+
+---
+
+### 9\. Copilot Prompt Files
+
+**Question:** Which GitHub Copilot customization feature provides reusable prompt templates for focused, repeatable tasks?
+
+**Answer:** Prompt files
+
+---
+
+### 10\. Copilot Prompt Files
+
+**Question:** Where are repository\-level GitHub Copilot prompt files stored?
+
+**Answer:** .github/prompts/
+
+---
+
+### 11\. Copilot CLI
+
+**Question:** Which GitHub Copilot CLI mode creates a structured implementation plan before writing code?
+
+**Answer:** Plan mode
+
+---
+
+### 12\. Copilot Cloud Agent
+
+**Question:** While working on a coding task, where does GitHub Copilot cloud agent make and test its changes?
+
+**Answer:** In its own ephemeral development environment powered by GitHub Actions.
+

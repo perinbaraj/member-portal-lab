@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="en" data-brand="github" data-entry="auth">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Live Quiz · Host</title>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--panel-low:#12161d;--inset:#010409;--border:#30363d;--ink:#e6edf3;--sub:#8b949e;
+--green:#3fb950;--green-em:#2ea043;--blue:#58a6ff;--purple:#a371f7;--teal:#39c5cf;--orange:#db6d28;--pink:#f778ba;--red:#f85149;--yellow:#e3b341;
+--accent:#3fb950;--accent-em:#2ea043;--accent-ink:#03130a;--button:#21262d;--hover-border:#6e7681;
+--body-glow:#17202b;--card-glow:rgba(0,0,0,.55);--brand-gradient:linear-gradient(90deg,#58a6ff,#a371f7,#3fb950,#db6d28);
+--correct-bg:rgba(63,185,80,.16);--info-bg:rgba(88,166,255,.08);}
+html[data-brand="microsoft"]{--bg:#071426;--panel:#10233d;--panel-low:#0b1b31;--inset:#06101e;--border:#315274;--ink:#f5f9ff;--sub:#a9bdd2;
+--green:#6ccb5f;--green-em:#57b84b;--blue:#50a7f8;--purple:#b49cff;--orange:#ffb34d;--red:#ff7373;--yellow:#ffd166;
+--accent:#50a7f8;--accent-em:#1688e5;--accent-ink:#041321;--button:#173453;--hover-border:#6aa9df;
+--body-glow:#123d68;--card-glow:rgba(0,20,45,.6);--brand-gradient:linear-gradient(90deg,#f25022 0 25%,#7fba00 25% 50%,#00a4ef 50% 75%,#ffb900 75%);
+--correct-bg:rgba(108,203,95,.16);--info-bg:rgba(80,167,248,.1);}
+html[data-entry="auth"]{--bg:#111318;--panel:#1b1f26;--panel-low:#171a20;--inset:#0c0e12;--border:#3d444d;--ink:#f0f3f6;--sub:#9ea7b3;
+--accent:#b7c0cc;--accent-em:#59636f;--accent-ink:#fff;--button:#252a31;--hover-border:#8c96a3;
+--body-glow:#252b33;--card-glow:rgba(0,0,0,.5);--brand-gradient:linear-gradient(90deg,#59636f,#b7c0cc,#59636f);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(1400px 700px at 50% -10%,var(--body-glow),var(--bg) 60%);color:var(--ink);
+font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;min-height:100vh;padding:28px 40px;overflow-x:hidden}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.top-actions{display:flex;align-items:center;gap:12px}
+.top-actions .btn{font-size:15px;padding:9px 16px}
+.top-actions a.btn{text-decoration:none}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-logo{width:30px;height:30px;flex:0 0 30px}
+.github-logo{fill:var(--ink)}
+.microsoft-logo{display:none}
+html[data-brand="microsoft"] .github-logo{display:none}
+html[data-brand="microsoft"] .microsoft-logo{display:block}
+html[data-entry="auth"] .brand-logo,html[data-entry="auth"] .badge-count{display:none}
+html[data-entry="auth"] #fullscreenBtn,html[data-entry="auth"] #hostFeedbackLink{display:none}
+html[data-presenting="true"] body{padding:18px 28px}
+html[data-presenting="true"] .settings,
+html[data-presenting="true"] .batch-toolbar,
+html[data-presenting="true"] .settings-status,
+html[data-presenting="true"] .qr-actions,
+html[data-presenting="true"] .qr-status,
+html[data-presenting="true"] #hostFeedbackLink{display:none!important}
+.kicker{color:var(--accent);font-weight:800;letter-spacing:.14em;font-size:14px;text-transform:uppercase}
+.badge-count{background:var(--panel);border:1px solid var(--border);border-radius:30px;padding:8px 18px;font-weight:700}
+.badge-count b{color:var(--accent)}
+.card{background:linear-gradient(180deg,var(--panel),var(--panel-low));border:1px solid var(--border);border-radius:20px;
+box-shadow:0 24px 60px var(--card-glow);position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:var(--brand-gradient)}
+.btn{appearance:none;border:1px solid var(--border);background:var(--button);color:var(--ink);padding:14px 26px;border-radius:12px;
+font-size:18px;font-weight:700;cursor:pointer;transition:.1s}
+.btn:hover{transform:translateY(-1px);border-color:var(--hover-border)}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,.brand-option input:focus-visible+span{outline:3px solid var(--accent);outline-offset:3px}
+.btn.primary{background:var(--accent-em);border-color:var(--accent-em);color:var(--accent-ink)}
+.btn.primary:hover{background:var(--accent)}
+.btn.big{font-size:22px;padding:18px 40px}
+.hide{display:none!important}
+.auth{max-width:500px;margin:10vh auto;padding:34px;text-align:center}
+.auth h1{margin-bottom:10px}
+.auth p{color:var(--sub);margin-bottom:18px}
+.auth input{display:block;width:100%;padding:14px;margin-bottom:16px;background:var(--inset);border:1px solid var(--border);border-radius:10px;color:var(--ink);font-size:18px}
+.auth .error{color:var(--red);margin-top:14px;min-height:22px}
+
+/* Lobby */
+.lobby{display:grid;grid-template-columns:420px 1fr;gap:28px;padding:34px 38px;align-items:center}
+.qrbox{text-align:center}
+.qrbox img{width:340px;height:340px;border-radius:16px;border:1px solid var(--border);background:var(--inset);padding:10px}
+.joinurl{margin-top:14px;font-family:ui-monospace,Menlo,monospace;font-size:22px;color:var(--blue)}
+.joinurl b{color:var(--accent)}
+.qr-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:14px}
+.qr-actions .btn{font-size:15px;padding:9px 14px}
+.qr-actions .btn:disabled{opacity:.5;cursor:not-allowed}
+.qr-status{min-height:22px;margin-top:8px;color:var(--green);font-weight:700;font-size:15px}
+.qr-overlay{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center}
+.qr-overlay-inner{text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px}
+.qr-overlay img{width:min(70vh,70vw);height:min(70vh,70vw);background:#fff;border-radius:18px;padding:14px}
+.qr-overlay-url{font-family:ui-monospace,Menlo,monospace;font-size:clamp(20px,3vw,34px);color:#fff;word-break:break-all}
+.lobby h1{font-size:44px;line-height:1.05;margin-bottom:10px}
+.lobby h1 .oct{color:var(--accent)}
+.lobby .sub{color:var(--sub);font-size:19px;margin-bottom:22px}
+.players{display:flex;flex-wrap:wrap;gap:10px;max-height:230px;overflow:auto;margin-bottom:22px}
+.chip{background:var(--inset);border:1px solid var(--border);border-radius:30px;padding:9px 16px;font-weight:700;font-size:16px;animation:pop .3s ease}
+.empty{color:var(--sub);font-style:italic}
+.settings{display:flex;align-items:end;flex-wrap:wrap;gap:14px;margin-bottom:16px}
+.settings label{display:flex;flex-direction:column;gap:6px;color:var(--sub);font-size:15px;font-weight:700}
+.settings select,.settings input{background:var(--inset);color:var(--ink);border:1px solid var(--border);border-radius:9px;padding:10px;font-size:18px}
+.settings input{width:105px}
+.settings select{min-width:180px}
+.settings .btn{font-size:16px;padding:10px 16px}
+.brand-choice{border:0;min-width:240px}
+.brand-choice legend{color:var(--sub);font-size:15px;font-weight:700;margin-bottom:6px}
+.brand-options{display:flex;padding:3px;background:var(--inset);border:1px solid var(--border);border-radius:11px}
+.brand-option{cursor:pointer}
+.brand-option input{position:absolute;opacity:0;pointer-events:none}
+.brand-option span{display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:8px;color:var(--sub);font-size:16px;font-weight:800}
+.brand-option input:checked+span{background:var(--button);color:var(--ink);box-shadow:0 0 0 1px var(--accent)}
+.brand-option input:disabled+span{cursor:not-allowed;opacity:.5}
+.brand-option-logo{width:20px;height:20px;fill:currentColor;flex:0 0 20px;overflow:visible}
+.brand-swatch{width:12px;height:12px;border-radius:3px;background:#24292f}
+.brand-swatch.microsoft{background:conic-gradient(#7fba00 0 25%,#00a4ef 0 50%,#ffb900 0 75%,#f25022 0)}
+.settings-status{min-height:22px;color:var(--yellow);font-size:16px;margin-bottom:12px}
+.visibility-choice{border:1px solid var(--border);background:var(--inset);border-radius:12px;padding:10px 12px;min-width:260px}
+.visibility-choice legend{color:var(--sub);font-size:15px;font-weight:700;margin-bottom:6px;padding:0 4px}
+.visibility-grid{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:10px}
+.visibility-grid label{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:14px;font-weight:700}
+.visibility-grid input{accent-color:var(--accent)}
+.batch-control{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex:1 0 100%;width:100%}
+.batch-control>label{display:flex;flex:1 1 360px;max-width:520px;flex-direction:column;gap:6px;color:var(--sub);font-size:15px;font-weight:700}
+.batch-control select{width:100%;height:42px}
+.batch-toolbar{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px}
+.batch-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;font-size:14px;padding:8px 12px}
+.batch-action svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 18px}
+.batch-action:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.workflow-panel{padding:30px 38px 38px}
+.batch-builder{padding:30px 38px 38px}
+.builder-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:24px}
+.builder-head h1{font-size:34px;margin-bottom:6px}
+.builder-head p,.field-help{color:var(--sub)}
+.builder-grid{display:grid;grid-template-columns:minmax(230px,.7fr) minmax(280px,1fr);gap:18px;margin-bottom:20px}
+.builder-field{display:flex;flex-direction:column;gap:7px;color:var(--sub);font-weight:700}
+.builder-field input,.builder-field textarea{width:100%;background:var(--inset);color:var(--ink);border:1px solid var(--border);border-radius:9px;padding:11px;font:inherit}
+.builder-field textarea{resize:vertical;min-height:84px}
+.builder-field input[aria-invalid="true"],.builder-field textarea[aria-invalid="true"]{border-color:var(--red)}
+.tag-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.tag-suggestions .btn{font-size:14px;padding:7px 10px}
+.batch-mode-chooser,.bulk-paste-panel{background:var(--inset);border:1px solid var(--border);border-radius:14px;padding:22px;margin:8px 0 20px}
+.batch-mode-chooser h2,.bulk-paste-panel h2{font-size:24px;margin-bottom:8px}
+.batch-mode-chooser p,.bulk-paste-panel>p{color:var(--sub);margin-bottom:18px}
+.batch-mode-actions{display:flex;flex-wrap:wrap;gap:12px}
+.prompt-builder{display:grid;grid-template-columns:minmax(180px,.3fr) minmax(260px,1fr);gap:14px;margin-bottom:14px}
+.prompt-output{min-height:260px!important;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;line-height:1.45}
+.copy-status{min-height:24px;color:var(--green);font-weight:700;margin:10px 0}
+.bulk-paste-panel .builder-field textarea{min-height:300px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;line-height:1.5}
+.paste-help{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;color:var(--sub)}
+.paste-example{background:var(--panel-low);border:1px solid var(--border);border-radius:10px;padding:12px}
+.paste-example strong{display:block;color:var(--ink);margin-bottom:6px}
+.paste-example code{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.paste-status{min-height:24px;color:var(--red);font-weight:700;margin:12px 0}
+.paste-status ul{padding-left:22px;margin-top:6px}
+.import-status{min-height:24px;color:var(--green);font-weight:700;margin:12px 0}
+.builder-toolbar,.question-actions,.option-actions,.builder-footer{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.builder-toolbar{justify-content:space-between;margin:22px 0 12px}
+.builder-toolbar h2{font-size:24px}
+.question-card,.review-card{background:var(--inset);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
+.question-card legend{font-size:20px;font-weight:800;padding:0 6px}
+.question-actions{justify-content:flex-end;margin-bottom:12px}
+.question-actions .btn,.option-actions .btn{font-size:14px;padding:7px 10px}
+.option-list{display:flex;flex-direction:column;gap:9px;margin:12px 0}
+.option-row{display:grid;grid-template-columns:auto auto minmax(180px,1fr) auto;align-items:center;gap:9px}
+.option-row input[type="radio"]{width:20px;height:20px;accent-color:var(--accent)}
+.option-key{width:30px;height:30px;border-radius:8px;background:var(--button);display:flex;align-items:center;justify-content:center;font-weight:900}
+.option-row input[type="text"]{background:var(--panel-low);color:var(--ink);border:1px solid var(--border);border-radius:9px;padding:10px;font:inherit}
+.option-actions{justify-content:flex-end}
+.validation-summary{border:1px solid var(--red);background:rgba(248,81,73,.08);border-radius:12px;padding:14px 18px;margin-bottom:16px}
+.validation-summary h2{font-size:18px;margin-bottom:8px}
+.validation-summary ul{padding-left:22px}
+.validation-summary a{color:var(--ink)}
+.builder-footer{justify-content:space-between;margin-top:22px}
+.builder-footer>div{display:flex;flex-wrap:wrap;gap:10px}
+.review-meta{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:18px}
+.review-pill{border:1px solid var(--border);border-radius:30px;padding:7px 12px;color:var(--sub);font-weight:700}
+.review-card h3{font-size:21px;margin-bottom:5px}
+.review-prompt{font-size:18px;font-weight:700;margin:10px 0}
+.review-options{padding-left:28px;margin-bottom:10px}
+.review-options li{padding:4px 0}
+.review-options li.correct{color:var(--green);font-weight:800}
+.review-explanation{color:var(--sub);border-left:3px solid var(--blue);padding-left:10px}
+.builder-status{min-height:24px;color:var(--yellow);font-weight:700;margin-top:12px}
+@media(max-width:900px){
+  body{padding:18px}
+  .lobby{grid-template-columns:1fr;padding:28px}
+  .qrbox img{width:min(340px,80vw);height:min(340px,80vw)}
+  .batch-control{align-items:stretch;flex-direction:column;gap:10px}
+  .batch-control>label{flex:none;max-width:none;width:100%}
+  .batch-toolbar{display:grid;grid-template-columns:1fr;gap:8px}
+  .batch-action{width:100%}
+  .builder-grid{grid-template-columns:1fr}
+  .paste-help{grid-template-columns:1fr}
+  .option-row{grid-template-columns:auto auto minmax(120px,1fr)}
+  .option-actions{grid-column:2/4}
+}
+
+/* Question */
+.qwrap{padding:30px 40px}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.tag{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:6px 14px;border-radius:30px;border:1px solid var(--border)}
+.qnum{color:var(--sub);font-weight:700;font-size:16px}
+.timerbar{height:12px;background:var(--inset);border-radius:30px;overflow:hidden;margin-bottom:22px}
+.timerbar>i{display:block;height:100%;width:100%;background:var(--green);transition:width 1s linear,background .3s}
+.qtext{font-size:clamp(26px,2.6vw,40px);font-weight:800;line-height:1.2;margin-bottom:26px;overflow-wrap:anywhere}
+.optgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.opt{display:flex;align-items:center;gap:18px;border:2px solid var(--border);background:var(--inset);border-radius:16px;padding:22px 24px;font-size:clamp(18px,1.6vw,24px);font-weight:600;min-width:0;overflow-wrap:anywhere}
+.opt .answer-text{min-width:0}
+.opt .k{width:46px;height:46px;flex:0 0 46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:#0d1117}
+.opt .cnt{margin-left:auto;font-weight:800;color:var(--sub);font-size:18px}
+.clock{font:800 32px ui-monospace,Menlo,monospace;color:var(--ink);text-align:right;margin:-5px 0 8px}
+.k0{background:var(--blue)}.k1{background:var(--green)}.k2{background:var(--orange)}.k3{background:var(--purple)}
+.k4{background:var(--teal)}.k5{background:var(--pink)}.k6{background:var(--yellow)}.k7{background:var(--red)}
+.opt.correct{border-color:var(--green);background:var(--correct-bg)}
+.opt.dim{opacity:.4}
+.answered{display:flex;align-items:center;gap:12px;margin-top:22px;color:var(--sub);font-size:18px;font-weight:700}
+.explain{margin-top:20px;border-left:4px solid var(--blue);background:var(--info-bg);padding:14px 20px;border-radius:10px;font-size:20px}
+.controls{display:flex;justify-content:space-between;align-items:center;margin-top:26px}
+
+/* Leaderboard */
+.lbwrap{padding:16px 40px 30px}
+.lbwrap h2{font-size:26px;margin-bottom:14px}
+.lbrow{display:flex;align-items:center;gap:16px;background:var(--inset);border:1px solid var(--border);border-radius:14px;padding:14px 20px;margin-bottom:10px;font-size:22px;animation:slide .3s ease}
+.lbrow .pos{width:44px;height:44px;flex:0 0 44px;border-radius:12px;background:var(--button);display:flex;align-items:center;justify-content:center;font-weight:900}
+.lbrow .nm{font-weight:800}
+.lbrow .pts{margin-left:auto;font-weight:900;color:var(--accent)}
+.lbrow.p1 .pos{background:var(--yellow);color:#0d1117}.lbrow.p2 .pos{background:#c9d1d9;color:#0d1117}.lbrow.p3 .pos{background:var(--orange);color:#0d1117}
+
+/* Podium / end */
+.end{padding:40px;text-align:center}
+.end h1{font-size:52px;margin-bottom:6px}
+.end h1 .oct{color:var(--accent)}
+.podium{display:flex;justify-content:center;align-items:flex-end;gap:22px;margin:36px 0}
+.pod{width:210px;border-radius:18px 18px 0 0;border:1px solid var(--border);border-bottom:none;background:linear-gradient(180deg,var(--panel),var(--panel-low));padding:22px 16px;display:flex;flex-direction:column;justify-content:flex-end;position:relative}
+.pod .medal{font-size:52px}
+.pod .nm{font-size:26px;font-weight:900;margin:8px 0 4px}
+.pod .pts{color:var(--accent);font-weight:800;font-size:20px}
+.pod.first{height:300px;border-color:var(--yellow)}
+.pod.second{height:240px;border-color:#c9d1d9}
+.pod.third{height:200px;border-color:var(--orange)}
+canvas.confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes slide{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<canvas class="confetti" id="confetti"></canvas>
+<div class="top">
+  <div class="brand">
+    <svg class="brand-logo github-logo" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    <svg class="brand-logo microsoft-logo" viewBox="0 0 24 24" aria-hidden="true"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M13 1h10v10H13z"/><path fill="#00a4ef" d="M1 13h10v10H1z"/><path fill="#ffb900" d="M13 13h10v10H13z"/></svg>
+    <span class="kicker" id="brandLabel" data-brand-text="live">Live Quiz · Host</span>
+  </div>
+  <div class="top-actions">
+    <div class="badge-count">👥 Players: <b id="pcount">0</b></div>
+    <a class="btn" id="hostFeedbackLink" href="/feedback.html?role=host">Feedback</a>
+    <button class="btn" id="fullscreenBtn" type="button" aria-pressed="false" title="Toggle a clean full-screen view for screen sharing">⛶ Full screen</button>
+    <button class="btn hide" id="logoutHostBtn" type="button" aria-label="Sign out of this host session" title="Sign out">⎋ Logout</button>
+  </div>
+</div>
+
+<section id="authView" class="card auth">
+  <h1>Host sign in</h1>
+  <p>Use an approved work email to receive a code, or enter a single-use code provided by an administrator.</p>
+  <form id="authForm">
+    <input id="hostEmail" type="email" autocomplete="email" required aria-label="Approved work email" placeholder="name@allowed-company.com"/>
+    <input id="hostOtp" type="text" inputmode="numeric" autocomplete="one-time-code" minlength="6" maxlength="6" aria-label="One-time passcode" placeholder="Enter 6-digit code" class="hide"/>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
+      <button class="btn primary" id="authBtn" type="submit">Send code</button>
+      <button class="btn hide" id="requestOtpBtn" type="button">Send new code</button>
+      <button class="btn" id="manualCodeBtn" type="button">Use admin-provided code</button>
+    </div>
+  </form>
+  <div class="error" id="authError" role="alert"></div>
+</section>
+<div id="gameView" class="card hide">
+  <!-- LOBBY -->
+  <section id="lobby" class="lobby">
+    <div class="qrbox">
+      <img id="qrimg" alt="Join QR"/>
+      <div class="joinurl">Join at <b id="joinurl">…</b></div>
+      <div class="qr-actions">
+        <button class="btn" id="downloadQrBtn" type="button" disabled>⬇ Download QR</button>
+        <button class="btn" id="copyJoinLinkBtn" type="button" disabled>🔗 Copy join link</button>
+        <button class="btn" id="largeQrBtn" type="button" disabled>⛶ Show large QR</button>
+      </div>
+      <div class="qr-status" id="qrStatus" role="status"></div>
+    </div>
+    <div>
+      <h1>Scan to join the <span class="oct" data-brand-text="name">GitHub Platform Challenge</span></h1>
+      <p class="sub">Scan the QR, pick a name, and play a question batch. Choose a brand, batch, and timer for each game.</p>
+      <form id="settingsForm" class="settings">
+        <fieldset class="brand-choice">
+          <legend>Experience brand</legend>
+          <div class="brand-options">
+            <label class="brand-option"><input type="radio" name="brand" value="github" checked disabled/><span><svg class="brand-option-logo" viewBox="-1 -1 18 18" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</span></label>
+            <label class="brand-option"><input type="radio" name="brand" value="microsoft" disabled/><span><i class="brand-swatch microsoft"></i>Microsoft</span></label>
+          </div>
+        </fieldset>
+        <label for="durationInput">Seconds per question
+          <input id="durationInput" type="number" min="10" max="120" step="1" value="20" required disabled/>
+        </label>
+        <button class="btn" id="saveDuration" type="submit" disabled>Set timer</button>
+        <fieldset class="visibility-choice">
+          <legend>Player visibility</legend>
+          <div class="visibility-grid">
+            <label><input type="checkbox" name="visibility" value="questionText" checked/>Question text</label>
+            <label><input type="checkbox" name="visibility" value="answerOptions"/>Answer choices</label>
+          </div>
+        </fieldset>
+        <div class="batch-control">
+          <label for="batchSelect">Question batch
+            <select id="batchSelect" required disabled><option value="">Choose a batch</option></select>
+          </label>
+          <div class="batch-toolbar" role="group" aria-label="Question batch actions">
+            <button class="btn primary batch-action" id="createBatchBtn" type="button" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              <span>New batch</span>
+            </button>
+            <button class="btn batch-action" id="previewBatchBtn" type="button" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>Preview</span>
+            </button>
+            <button class="btn batch-action" id="editSelectedBatchBtn" type="button" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z"/><path d="m14 7 3 3"/></svg>
+              <span>Edit</span>
+            </button>
+          </div>
+        </div>
+      </form>
+      <div class="settings-status" id="settingsStatus" role="status">Choose a batch before starting.</div>
+      <div class="players" id="playerchips"><span class="empty">Waiting for players…</span></div>
+      <button class="btn primary big" id="startBtn" onclick="startGame()" disabled>Start game</button>
+    </div>
+  </section>
+
+  <!-- CUSTOM BATCH WORKFLOW -->
+  <section id="batchBuilder" class="batch-builder hide" aria-labelledby="builderTitle">
+    <div class="builder-head">
+      <div>
+        <h1 id="builderTitle">Create a custom question batch</h1>
+        <p id="builderIntro">Add batch details and questions, then review everything before submitting.</p>
+      </div>
+      <button class="btn" id="cancelBuilderBtn" type="button">Cancel</button>
+    </div>
+    <div id="editBatch">
+      <div id="validationSummary" class="validation-summary hide" role="alert" tabindex="-1"></div>
+      <div class="builder-grid">
+        <label class="builder-field" for="batchLabel">Batch label
+          <input id="batchLabel" type="text" maxlength="80" autocomplete="off" placeholder="Developer tools challenge"/>
+          <span class="field-help">1–80 characters</span>
+        </label>
+        <div class="builder-field">
+          <label for="batchTags">Tags, separated by commas</label>
+          <input id="batchTags" type="text" maxlength="409" autocomplete="off" placeholder="GitHub Copilot, Azure AI Foundry"/>
+          <span class="field-help">1–10 tags, up to 40 characters each</span>
+          <div class="tag-suggestions" aria-label="Suggested tags">
+            <button class="btn tag-suggestion" type="button" data-tag="GitHub Copilot">+ GitHub Copilot</button>
+            <button class="btn tag-suggestion" type="button" data-tag="Fabric">+ Fabric</button>
+            <button class="btn tag-suggestion" type="button" data-tag="Azure AI Foundry">+ Azure AI Foundry</button>
+          </div>
+        </div>
+      </div>
+      <div id="batchModeChooser" class="batch-mode-chooser" aria-labelledby="batchModeTitle">
+        <h2 id="batchModeTitle">Create questions with any AI tool</h2>
+        <p>Copy a ready-made prompt, use it with your preferred AI tool, then paste the result here for validation and review.</p>
+        <div class="batch-mode-actions">
+          <button class="btn primary" id="prepareQuestionsBtn" type="button">Prepare prompt and paste questions</button>
+        </div>
+      </div>
+
+      <section id="bulkPastePanel" class="bulk-paste-panel hide" aria-labelledby="bulkPasteTitle">
+        <h2 id="bulkPasteTitle">Generate externally and paste questions</h2>
+        <p id="promptWorkflowHelp">The app does not send content to an AI service. Copy this prompt into any AI tool, then paste its plain-text response below.</p>
+        <div class="prompt-builder">
+          <label class="builder-field" for="promptSourceMode">Prompt source
+            <select id="promptSourceMode">
+              <option value="general">General topic or guidance</option>
+              <option value="slide-deck">Microsoft 365 Copilot + slide deck</option>
+            </select>
+          </label>
+          <label class="builder-field" for="promptQuestionCount">Question count
+            <input id="promptQuestionCount" type="number" min="1" max="50" step="1" value="5"/>
+          </label>
+          <label class="builder-field" for="promptGuidance">Optional guidance
+            <textarea id="promptGuidance" maxlength="2000" rows="3" placeholder="Create practical beginner questions for software engineers."></textarea>
+          </label>
+        </div>
+        <label class="builder-field" for="externalAiPrompt">Prompt to copy
+          <textarea id="externalAiPrompt" class="prompt-output" readonly></textarea>
+        </label>
+        <button class="btn" id="copyExternalAiPromptBtn" type="button">Copy prompt</button>
+        <div id="copyPromptStatus" class="copy-status" role="status" aria-live="polite"></div>
+        <label class="builder-field" for="batchPasteText">Questions to import
+          <textarea id="batchPasteText" rows="14" aria-describedby="batchPasteHelp batchPasteStatus" placeholder="Question: What command creates a Git branch?&#10;A: git add&#10;B: git branch&#10;C: git merge&#10;D: git clone&#10;Answer: B"></textarea>
+        </label>
+        <div id="batchPasteHelp" class="paste-help">
+          <div class="paste-example">
+            <strong>Labeled format</strong>
+            <code>Question: What is 2 + 2?
+A: 3
+B: 4
+C: 5
+D: 6
+Answer: B</code>
+          </div>
+          <div class="paste-example">
+            <strong>Numbered format</strong>
+            <code>1. What is 2 + 2?
+1) 3
+2) 4
+3) 5
+4) 6
+Answer: 2</code>
+          </div>
+        </div>
+        <div id="batchPasteStatus" class="paste-status" role="alert" aria-live="assertive" aria-atomic="true"></div>
+        <div class="builder-footer">
+          <button class="btn" id="backToBatchModesBtn" type="button">Back to choices</button>
+          <button class="btn primary" id="importPastedQuestionsBtn" type="button">Import questions for review</button>
+        </div>
+      </section>
+
+      <div id="manualBatchEditor" class="hide">
+        <div id="manualImportStatus" class="import-status hide" role="status" aria-live="polite" aria-atomic="true"></div>
+        <div class="builder-toolbar">
+          <h2>Questions</h2>
+          <label class="builder-field" for="questionCount">Question count
+            <input id="questionCount" type="number" min="1" max="50" step="1" value="1"/>
+          </label>
+        </div>
+        <div id="questionEditor"></div>
+        <div class="builder-toolbar">
+          <button class="btn" id="addQuestionBtn" type="button">Add question</button>
+          <span class="field-help">1–50 questions; each question needs 2–8 options.</span>
+        </div>
+        <div class="builder-footer">
+          <button class="btn" id="resetDraftBtn" type="button">Reset draft</button>
+          <div>
+            <button class="btn" id="backToLobbyBtn" type="button">Back to lobby</button>
+            <button class="btn primary" id="reviewBatchBtn" type="button">Review batch</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="reviewBatch" class="hide">
+      <div id="reviewSummary"></div>
+      <div class="builder-status" id="builderStatus" role="status" aria-live="polite"></div>
+      <div class="builder-footer">
+        <button class="btn" id="returnToEditBtn" type="button">Return to edit</button>
+        <div>
+          <button class="btn hide" id="saveAsNewBtn" type="button">Save as new batch</button>
+          <button class="btn primary" id="submitBatchBtn" type="button">Create and select batch</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUESTION -->
+  <section id="question" class="qwrap hide">
+    <div class="qhead">
+      <span class="tag" id="qtag">TOPIC</span>
+      <span class="qnum" id="qnum">Q1 / 12</span>
+    </div>
+    <div class="clock" id="hostClock" role="timer" aria-label="Time remaining">00:20</div>
+    <div class="timerbar"><i id="qtimer"></i></div>
+    <div class="qtext" id="qtext">…</div>
+    <div class="optgrid" id="qopts"></div>
+    <div class="explain hide" id="qexplain"></div>
+    <div class="controls">
+      <div class="answered">✅ Answered: <span id="acount">0</span> / <span id="atotal">0</span></div>
+      <div>
+        <button class="btn" id="skipBtn" onclick="control('host:skip')">Reveal now</button>
+        <button class="btn primary hide" id="nextBtn" onclick="control('host:next')">Next →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEADERBOARD (between questions) -->
+  <section id="board" class="lbwrap hide">
+    <h2>🏆 Leaderboard</h2>
+    <div id="lbrows"></div>
+    <div class="controls">
+      <span></span>
+      <button class="btn primary" onclick="control('host:next')" id="boardNext">Next question →</button>
+    </div>
+  </section>
+
+  <!-- END / PODIUM -->
+  <section id="end" class="end hide">
+    <h1>🎉 We have our <span class="oct">winners!</span></h1>
+    <div class="podium" id="podium"></div>
+    <div id="lbrowsEnd" style="max-width:640px;margin:0 auto"></div>
+    <button class="btn primary big" style="margin-top:24px" onclick="control('host:restart')">Play again</button>
+  </section>
+</div>
+
+<div class="qr-overlay hide" id="qrOverlay" role="dialog" aria-modal="true" aria-label="Player join QR code">
+  <div class="qr-overlay-inner">
+    <img id="qrOverlayImg" alt="Join QR"/>
+    <div class="qr-overlay-url" id="qrOverlayUrl">…</div>
+    <button class="btn" id="closeQrOverlayBtn" type="button">Close</button>
+  </div>
+</div>
+
+<script src="/batch-prompt-builder.js"></script>
+<script src="/batch-text-parser.js"></script>
+<script>
+const s = io();
+const $ = id => document.getElementById(id);
+let timerInt=null,selectedBatch=null,playerCount=0,lobbyOpen=false;
+const OTP_REQUEST_TIMEOUT_MS=60000;
+let hostEmail="",hostChallengeId="",authenticated=false,currentBrand="github",otpCooldownTimer=null,manualCodeMode=false;
+let batchWorkflowOpen=false,batchDraftDirty=false,knownBatches=[];
+let batchWorkflowMode="create",editSourceBatchId=null;
+let hostSessionId="",hostResumeToken="";
+const HOST_SESSION_KEY="liveQuizHostSession";
+const LIMITS={questions:50,label:80,tags:10,tag:40,topic:80,prompt:500,options:8,option:300,explanation:1000};
+const BRANDS={
+  github:{name:"GitHub Platform Challenge",live:"GitHub Platform Challenge · Live",title:"GitHub Platform Challenge — Host"},
+  microsoft:{name:"Microsoft Cloud Challenge",live:"Microsoft Cloud Challenge · Live",title:"Microsoft Cloud Challenge — Host"}
+};
+const NEUTRAL_HOST_TITLE="Live Quiz · Host";
+const DEFAULT_VISIBILITY = { questionText: true, answerOptions: false };
+let currentVisibility = { ...DEFAULT_VISIBILITY };
+function normalizeVisibility(policy = {}) {
+  const merged = { ...DEFAULT_VISIBILITY, ...(policy || {}) };
+  return {
+    questionText: Boolean(merged.questionText),
+    answerOptions: Boolean(merged.answerOptions),
+  };
+}
+function view(id) {
+  for (const panel of ["lobby", "batchBuilder", "question", "board", "end"]) {
+    $(panel).classList.toggle("hide", panel !== id);
+  }
+}
+function readVisibilitySettings() {
+  const values = [...document.querySelectorAll('input[name="visibility"]:checked')].map(input => input.value);
+  return normalizeVisibility({
+    questionText: values.includes("questionText"),
+    answerOptions: values.includes("answerOptions"),
+  });
+}
+function applyVisibilitySettings(policy = DEFAULT_VISIBILITY) {
+  const next = normalizeVisibility(policy);
+  currentVisibility = next;
+  document.querySelectorAll('input[name="visibility"]').forEach(input => {
+    input.checked = Boolean(next[input.value]);
+  });
+}
+function sendVisibilitySettings() {
+  if (!authenticated || !lobbyOpen) return;
+  const previous = currentVisibility;
+  const next = readVisibilitySettings();
+  currentVisibility = next;
+  s.timeout(5000).emit("host:set-visibility", next, (err, res) => {
+    if (err || !res?.ok) {
+      applyVisibilitySettings(previous);
+      $("settingsStatus").textContent = err ? "Visibility update timed out." : res?.error || "Could not update player visibility.";
+      return;
+    }
+    currentVisibility = normalizeVisibility(res.visibility || next);
+    applyVisibilitySettings(currentVisibility);
+    $("settingsStatus").textContent = "Player visibility updated.";
+  });
+}
+
+function normalizeBrand(brand){return brand==="microsoft"?"microsoft":"github";}
+function applyBrand(brand){
+  currentBrand=normalizeBrand(brand);
+  document.documentElement.dataset.brand=currentBrand;
+  const choice=document.querySelector(`input[name="brand"][value="${currentBrand}"]`);
+  if(choice)choice.checked=true;
+  if(document.documentElement.dataset.entry==="auth")return;
+  document.title=BRANDS[currentBrand].title;
+  document.querySelectorAll("[data-brand-text]").forEach(el=>{el.textContent=BRANDS[currentBrand][el.dataset.brandText];});
+}
+function setEntryMode(mode){
+  document.documentElement.dataset.entry=mode;
+  if(mode==="auth"){
+    document.title=NEUTRAL_HOST_TITLE;
+    $("brandLabel").textContent=NEUTRAL_HOST_TITLE;
+    return;
+  }
+  applyBrand(currentBrand);
+}
+function resetOtpStep(){
+  clearInterval(otpCooldownTimer);
+  hostEmail="";
+  hostChallengeId="";
+  manualCodeMode=false;
+  $("hostEmail").value="";
+  $("hostEmail").readOnly=false;
+  $("hostOtp").value="";
+  $("hostOtp").placeholder="Enter 6-digit code";
+  $("hostOtp").classList.add("hide");
+  $("authBtn").textContent="Send code";
+  $("authBtn").disabled=!s.connected;
+  $("requestOtpBtn").textContent="Send new code";
+  $("requestOtpBtn").disabled=false;
+  $("requestOtpBtn").classList.add("hide");
+  $("manualCodeBtn").textContent="Use admin-provided code";
+}
+function savedHostSession(){
+  try{
+    const value=JSON.parse(sessionStorage.getItem(HOST_SESSION_KEY));
+    return value&&typeof value.sessionId==="string"&&typeof value.token==="string"?value:null;
+  }catch{return null;}
+}
+function saveHostSession(){
+  try{sessionStorage.setItem(HOST_SESSION_KEY,JSON.stringify({sessionId:hostSessionId,token:hostResumeToken}));}catch{}
+}
+function clearHostSession(){
+  hostSessionId="";
+  hostResumeToken="";
+  try{sessionStorage.removeItem(HOST_SESSION_KEY);}catch{}
+}
+function logoutHostSession(){
+  clearHostSession();
+  if(s && s.connected)s.emit("host:logout");
+  authenticated=false;
+  lobbyOpen=false;
+  clearInterval(timerInt);
+  resetOtpStep();
+  $("gameView").classList.add("hide");
+  $("authView").classList.remove("hide");
+  $("logoutHostBtn").classList.add("hide");
+  setEntryMode("auth");
+  $("authBtn").disabled=!s.connected;
+  $("authError").textContent="You have been signed out.";
+}
+function lock(message){
+  authenticated=false;
+  lobbyOpen=false;
+  clearInterval(timerInt);
+  $("gameView").classList.add("hide");
+  $("authView").classList.remove("hide");
+  $("logoutHostBtn").classList.add("hide");
+  setEntryMode("auth");
+  $("authBtn").disabled=!s.connected;
+  $("authError").textContent=message;
+}
+function activateHostSession(res){
+  hostSessionId=String(res.sessionId||"");
+  if(res.resumeToken)hostResumeToken=String(res.resumeToken);
+  if(hostSessionId&&hostResumeToken)saveHostSession();
+  hostEmail=String(res.email||hostEmail||"");
+  authenticated=true;
+  $("authView").classList.add("hide");
+  $("gameView").classList.remove("hide");
+  $("logoutHostBtn").classList.remove("hide");
+  setEntryMode("game");
+  $("hostFeedbackLink").href=`/feedback.html?role=host&session=${encodeURIComponent(hostSessionId)}`;
+  $("authError").textContent="";
+  loadShareLinks();
+  setSettingsEnabled(lobbyOpen);
+  updateStart();
+  if(res.phase==="lobby")view("lobby");
+}
+function control(event){if(authenticated && s.connected)s.emit(event);}
+function startGame(){
+  if(!authenticated || !lobbyOpen || !selectedBatch || !playerCount)return;
+  s.timeout(5000).emit("host:start",(err,res)=>{
+    if(err || !res?.ok)$("settingsStatus").textContent=err?"Start timed out. Try again.":res?.error || "Could not start.";
+  });
+}
+function updateStart(){
+  $("startBtn").disabled=!authenticated || !lobbyOpen || !selectedBatch || playerCount<1;
+}
+function setSettingsEnabled(enabled){
+  const showSelectedBatchActions = enabled && !!selectedBatch && !batchWorkflowOpen;
+  $("batchSelect").disabled=!enabled;
+  $("durationInput").disabled=!enabled;
+  $("saveDuration").disabled=!enabled;
+  $("createBatchBtn").disabled=!enabled;
+  $("previewBatchBtn").disabled=!showSelectedBatchActions;
+  $("editSelectedBatchBtn").disabled=!showSelectedBatchActions;
+  document.querySelectorAll('input[name="brand"]').forEach(input=>{input.disabled=!enabled;});
+  document.querySelectorAll('input[name="visibility"]').forEach(input=>{input.disabled=!enabled;});
+}
+$("settingsForm").addEventListener("change",e=>{
+  if(e.target.name!=="brand")return;
+  const next=normalizeBrand(e.target.value),previous=currentBrand;
+  if(!authenticated || !lobbyOpen){applyBrand(previous);return;}
+  applyBrand(next);
+  $("settingsStatus").textContent=`Switching to ${BRANDS[next].name}…`;
+  s.timeout(5000).emit("host:select-brand",next,(err,res)=>{
+    if(err || !res?.ok){
+      applyBrand(previous);
+      $("settingsStatus").textContent=err?"Brand selection timed out.":res?.error || "Could not select brand.";
+      return;
+    }
+    applyBrand(res.brand ?? next);
+    $("settingsStatus").textContent=`${BRANDS[currentBrand].name} selected.`;
+  });
+});
+$("batchSelect").addEventListener("change",()=>{
+  const id=$("batchSelect").value;
+  if(!authenticated || !lobbyOpen || !id){
+    selectedBatch=null;
+    setSettingsEnabled(authenticated && lobbyOpen);
+    updateStart();
+    return;
+  }
+  s.timeout(5000).emit("host:select-batch",id,(err,res)=>{
+    if(err || !res?.ok){
+      $("batchSelect").value=selectedBatch || "";
+      $("settingsStatus").textContent=err?"Batch selection timed out.":res?.error || "Could not select batch.";
+      return;
+    }
+    selectedBatch=String(res.batchId);
+    setSettingsEnabled(true);
+    updateStart();
+    $("settingsStatus").textContent=`${res.batch?.label || "Batch"} selected. Preview it or start the game.`;
+  });
+});
+$("settingsForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  if(!authenticated || !lobbyOpen)return;
+  const raw=$("durationInput").value;
+  const duration=Number(raw);
+  if(!/^\d+$/.test(raw) || duration<10 || duration>120){
+    $("settingsStatus").textContent="Choose 10 to 120 whole seconds.";return;
+  }
+  s.timeout(5000).emit("host:set-duration",duration,(err,res)=>{
+    if(err || !res?.ok)$("settingsStatus").textContent=err?"Timer change timed out.":res?.error || "Could not set timer.";
+    else $("settingsStatus").textContent=`Timer set to ${res.duration} seconds.`;
+  });
+});
+document.querySelectorAll('input[name="visibility"]').forEach(input => {
+  input.addEventListener("change", () => {
+    if (!authenticated || !lobbyOpen) {
+      applyVisibilitySettings(currentVisibility);
+      return;
+    }
+    sendVisibilitySettings();
+  });
+});
+function clearNode(node){node.replaceChildren();}
+function makeNode(tag,className,text){
+  const node=document.createElement(tag);
+  if(className)node.className=className;
+  if(text!==undefined)node.textContent=text;
+  return node;
+}
+function newQuestion(){
+  return {topic:"",prompt:"",options:["",""],correctOption:0,explanation:""};
+}
+let batchDraft={label:"",tags:"",questions:[newQuestion()]};
+function parsedTags(){
+  const seen=new Set();
+  return batchDraft.tags.split(",").map(tag=>tag.trim()).filter(tag=>{
+    const key=tag.toLocaleLowerCase();
+    if(!tag || seen.has(key))return false;
+    seen.add(key);
+    return true;
+  });
+}
+function syncDraftFromEditor(){
+  batchDraft.label=$("batchLabel").value;
+  batchDraft.tags=$("batchTags").value;
+  const questionCards=[...document.querySelectorAll("#questionEditor .question-card")];
+  if(!questionCards.length)return;
+  batchDraft.questions=questionCards.map(card=>{
+    const correct=card.querySelector('input[type="radio"]:checked');
+    return {
+      topic:card.querySelector(".question-topic").value,
+      prompt:card.querySelector(".question-prompt").value,
+      options:[...card.querySelectorAll(".option-text")].map(input=>input.value),
+      correctOption:correct?Number(correct.value):0,
+      explanation:card.querySelector(".question-explanation").value
+    };
+  });
+}
+function addButton(text,action,questionIndex,optionIndex){
+  const button=makeNode("button","btn",text);
+  button.type="button";
+  button.dataset.action=action;
+  button.dataset.question=String(questionIndex);
+  if(optionIndex!==undefined)button.dataset.option=String(optionIndex);
+  return button;
+}
+function addField(parent,labelText,id,value,className,maxLength,multiline=false){
+  const label=makeNode("label","builder-field");
+  label.htmlFor=id;
+  label.append(document.createTextNode(labelText));
+  const input=document.createElement(multiline?"textarea":"input");
+  input.id=id;
+  input.className=className;
+  input.value=value;
+  input.maxLength=maxLength;
+  if(!multiline)input.type="text";
+  label.append(input);
+  parent.append(label);
+  return input;
+}
+function renderQuestionEditor(){
+  const editor=$("questionEditor");
+  clearNode(editor);
+  batchDraft.questions.forEach((question,questionIndex)=>{
+    const card=makeNode("fieldset","question-card");
+    card.dataset.question=String(questionIndex);
+    const legend=makeNode("legend","",`Question ${questionIndex+1}`);
+    card.append(legend);
+    const questionActions=makeNode("div","question-actions");
+    const up=addButton("Move up","move-question-up",questionIndex);
+    const down=addButton("Move down","move-question-down",questionIndex);
+    const remove=addButton("Remove question","remove-question",questionIndex);
+    up.disabled=questionIndex===0;
+    down.disabled=questionIndex===batchDraft.questions.length-1;
+    remove.disabled=batchDraft.questions.length===1;
+    questionActions.append(up,down,remove);
+    card.append(questionActions);
+    addField(card,"Topic",`question-${questionIndex}-topic`,question.topic,"question-topic",LIMITS.topic);
+    addField(card,"Prompt",`question-${questionIndex}-prompt`,question.prompt,"question-prompt",LIMITS.prompt,true);
+    const optionsLabel=makeNode("div","builder-field");
+    optionsLabel.append(makeNode("span","",`Options — select the correct answer`));
+    const optionList=makeNode("div","option-list");
+    question.options.forEach((option,optionIndex)=>{
+      const row=makeNode("div","option-row");
+      const radio=document.createElement("input");
+      radio.type="radio";
+      radio.name=`correct-${questionIndex}`;
+      radio.value=String(optionIndex);
+      radio.checked=question.correctOption===optionIndex;
+      radio.setAttribute("aria-label",`Mark option ${optionIndex+1} correct`);
+      const key=makeNode("span","option-key",String.fromCharCode(65+optionIndex));
+      const input=document.createElement("input");
+      input.type="text";
+      input.id=`question-${questionIndex}-option-${optionIndex}`;
+      input.className="option-text";
+      input.value=option;
+      input.maxLength=LIMITS.option;
+      input.placeholder=`Option ${optionIndex+1}`;
+      input.setAttribute("aria-label",`Question ${questionIndex+1}, option ${optionIndex+1}`);
+      const actions=makeNode("div","option-actions");
+      const optionUp=addButton("↑","move-option-up",questionIndex,optionIndex);
+      const optionDown=addButton("↓","move-option-down",questionIndex,optionIndex);
+      const optionRemove=addButton("Remove","remove-option",questionIndex,optionIndex);
+      optionUp.disabled=optionIndex===0;
+      optionDown.disabled=optionIndex===question.options.length-1;
+      optionRemove.disabled=question.options.length===2;
+      optionUp.setAttribute("aria-label",`Move option ${optionIndex+1} up`);
+      optionDown.setAttribute("aria-label",`Move option ${optionIndex+1} down`);
+      optionRemove.setAttribute("aria-label",`Remove option ${optionIndex+1}`);
+      actions.append(optionUp,optionDown,optionRemove);
+      row.append(radio,key,input,actions);
+      optionList.append(row);
+    });
+    optionsLabel.append(optionList);
+    const addOption=addButton("Add option","add-option",questionIndex);
+    addOption.disabled=question.options.length===LIMITS.options;
+    optionsLabel.append(addOption);
+    card.append(optionsLabel);
+    addField(card,"Optional explanation",`question-${questionIndex}-explanation`,question.explanation,"question-explanation",LIMITS.explanation,true);
+    editor.append(card);
+  });
+  $("batchLabel").value=batchDraft.label;
+  $("batchTags").value=batchDraft.tags;
+  $("questionCount").value=String(batchDraft.questions.length);
+  $("addQuestionBtn").disabled=batchDraft.questions.length===LIMITS.questions;
+}
+function validateDraft(){
+  syncDraftFromEditor();
+  const errors=[];
+  const label=batchDraft.label.trim();
+  const tags=parsedTags();
+  if(!label)errors.push({id:"batchLabel",message:"Enter a batch label."});
+  if(label.length>LIMITS.label)errors.push({id:"batchLabel",message:`Keep the batch label to ${LIMITS.label} characters.`});
+  if(!tags.length)errors.push({id:"batchTags",message:"Add at least one tag."});
+  if(tags.length>LIMITS.tags)errors.push({id:"batchTags",message:`Use no more than ${LIMITS.tags} tags.`});
+  if(tags.some(tag=>tag.length>LIMITS.tag))errors.push({id:"batchTags",message:`Keep every tag to ${LIMITS.tag} characters.`});
+  if(batchDraft.questions.length<1 || batchDraft.questions.length>LIMITS.questions){
+    errors.push({id:"questionCount",message:`Use 1–${LIMITS.questions} questions.`});
+  }
+  batchDraft.questions.forEach((question,questionIndex)=>{
+    const number=questionIndex+1;
+    if(!question.topic.trim())errors.push({id:`question-${questionIndex}-topic`,message:`Question ${number}: enter a topic.`});
+    if(question.topic.trim().length>LIMITS.topic)errors.push({id:`question-${questionIndex}-topic`,message:`Question ${number}: keep the topic to ${LIMITS.topic} characters.`});
+    if(!question.prompt.trim())errors.push({id:`question-${questionIndex}-prompt`,message:`Question ${number}: enter a prompt.`});
+    if(question.prompt.trim().length>LIMITS.prompt)errors.push({id:`question-${questionIndex}-prompt`,message:`Question ${number}: keep the prompt to ${LIMITS.prompt} characters.`});
+    if(question.options.length<2 || question.options.length>LIMITS.options)errors.push({id:`question-${questionIndex}-prompt`,message:`Question ${number}: use 2–${LIMITS.options} options.`});
+    const normalized=new Set();
+    question.options.forEach((option,optionIndex)=>{
+      const value=option.trim();
+      if(!value)errors.push({id:`question-${questionIndex}-option-${optionIndex}`,message:`Question ${number}, option ${optionIndex+1}: enter option text.`});
+      if(value.length>LIMITS.option)errors.push({id:`question-${questionIndex}-option-${optionIndex}`,message:`Question ${number}, option ${optionIndex+1}: keep text to ${LIMITS.option} characters.`});
+      const key=value.toLocaleLowerCase();
+      if(value && normalized.has(key))errors.push({id:`question-${questionIndex}-option-${optionIndex}`,message:`Question ${number}: options must be unique.`});
+      normalized.add(key);
+    });
+    if(question.explanation.trim().length>LIMITS.explanation)errors.push({id:`question-${questionIndex}-explanation`,message:`Question ${number}: keep the explanation to ${LIMITS.explanation} characters.`});
+    if(!Number.isInteger(question.correctOption) || question.correctOption<0 || question.correctOption>=question.options.length){
+      errors.push({id:`question-${questionIndex}-option-0`,message:`Question ${number}: select a valid correct option.`});
+    }
+  });
+  return errors;
+}
+function showValidation(errors){
+  document.querySelectorAll('#editBatch [aria-invalid="true"]').forEach(node=>node.removeAttribute("aria-invalid"));
+  const summary=$("validationSummary");
+  clearNode(summary);
+  if(!errors.length){summary.classList.add("hide");return;}
+  summary.append(makeNode("h2","",`Fix ${errors.length} issue${errors.length===1?"":"s"} before review`));
+  const list=document.createElement("ul");
+  errors.forEach(error=>{
+    const item=document.createElement("li");
+    const link=makeNode("a","",error.message);
+    link.href=`#${error.id}`;
+    link.addEventListener("click",event=>{
+      event.preventDefault();
+      $(error.id)?.focus();
+    });
+    item.append(link);
+    list.append(item);
+    $(error.id)?.setAttribute("aria-invalid","true");
+  });
+  summary.append(list);
+  summary.classList.remove("hide");
+  summary.focus();
+}
+function renderReview(){
+  const summary=$("reviewSummary");
+  clearNode(summary);
+  summary.append(makeNode("h2","",batchDraft.label.trim()));
+  const meta=makeNode("div","review-meta");
+  meta.append(makeNode("span","review-pill",`${batchDraft.questions.length} question${batchDraft.questions.length===1?"":"s"}`));
+  meta.append(makeNode("span","review-pill",BRANDS[currentBrand].name));
+  parsedTags().forEach(tag=>meta.append(makeNode("span","review-pill",tag)));
+  summary.append(meta);
+  batchDraft.questions.forEach((question,index)=>{
+    const card=makeNode("article","review-card");
+    card.append(makeNode("h3","",`${index+1}. ${question.topic.trim()}`));
+    card.append(makeNode("p","review-prompt",question.prompt.trim()));
+    const options=makeNode("ol","review-options");
+    question.options.forEach((option,optionIndex)=>{
+      const item=makeNode("li",optionIndex===question.correctOption?"correct":"",option.trim());
+      if(optionIndex===question.correctOption)item.append(document.createTextNode(" ✓ Correct"));
+      options.append(item);
+    });
+    card.append(options);
+    if(question.explanation.trim())card.append(makeNode("p","review-explanation",`Explanation: ${question.explanation.trim()}`));
+    summary.append(card);
+  });
+}
+function resetDraft(render=true){
+  batchDraft={label:"",tags:"",questions:[newQuestion()]};
+  batchDraftDirty=false;
+  batchWorkflowMode="create";
+  editSourceBatchId=null;
+  showValidation([]);
+  $("builderStatus").textContent="";
+  if(render)renderQuestionEditor();
+}
+function clearPasteImport(){
+  $("batchPasteText").value="";
+  clearNode($("batchPasteStatus"));
+  clearNode($("manualImportStatus"));
+  $("manualImportStatus").classList.add("hide");
+}
+function showPasteErrors(errors){
+  const status=$("batchPasteStatus");
+  clearNode(status);
+  status.append(makeNode("span","","Could not import this question set:"));
+  const list=document.createElement("ul");
+  errors.forEach(message=>list.append(makeNode("li","",message)));
+  status.append(list);
+}
+function showImportSuccess(questionCount){
+  clearNode($("batchPasteStatus"));
+  const status=$("manualImportStatus");
+  status.textContent=`Imported ${questionCount} question${questionCount===1?"":"s"}. Review and edit them before continuing.`;
+  status.classList.remove("hide");
+}
+function draftFromBatch(batch){
+  return {
+    label:batch.label || "",
+    tags:Array.isArray(batch.tags)?batch.tags.join(", "):"",
+    questions:(Array.isArray(batch.questions)?batch.questions:[]).map(question=>({
+      topic:question.topic || question.title || "",
+      prompt:question.prompt || "",
+      options:Array.isArray(question.options)?[...question.options]:["",""],
+      correctOption:Number.isInteger(question.correctAnswerIndex)?question.correctAnswerIndex:0,
+      explanation:question.explanation || ""
+    }))
+  };
+}
+function configureWorkflow(mode,batchLabel=""){
+  batchWorkflowMode=mode;
+  const preview=mode==="preview",editing=mode==="edit";
+  $("builderTitle").textContent=preview?`Preview ${batchLabel}`:editing?`Edit ${batchLabel}`:"Create a custom question batch";
+  $("builderIntro").textContent=preview
+    ?"Review every question and answer before using or editing this batch."
+    :editing
+      ?"Make changes, review them, then update the selected batch or save a new copy."
+      :"Add batch details, then choose how to enter your questions.";
+  $("returnToEditBtn").textContent=preview?"Edit selected batch":"Return to edit";
+  $("saveAsNewBtn").classList.toggle("hide",!editing);
+  $("submitBatchBtn").classList.toggle("hide",preview);
+  $("submitBatchBtn").textContent=editing?"Update selected batch":"Create and select batch";
+}
+function showBatchEntryMode(mode,focus=true){
+  const choosing=mode==="choose",pasting=mode==="paste",manual=mode==="manual";
+  $("batchModeChooser").classList.toggle("hide",!choosing);
+  $("bulkPastePanel").classList.toggle("hide",!pasting);
+  $("manualBatchEditor").classList.toggle("hide",!manual);
+  if(!manual)$("manualImportStatus").classList.add("hide");
+  if(!focus)return;
+  if(choosing)$("prepareQuestionsBtn").focus();
+  else if(pasting)$("batchPasteText").focus();
+  else $(`question-0-topic`)?.focus();
+}
+function returnToLobby(discard=false){
+  if(discard && batchDraftDirty && !confirm("Discard this custom batch draft?"))return;
+  if(discard)resetDraft(false);
+  batchWorkflowOpen=false;
+  $("reviewBatch").classList.add("hide");
+  $("editBatch").classList.remove("hide");
+  view("lobby");
+}
+function openBatchBuilder(){
+  if(!authenticated || !lobbyOpen)return;
+  resetDraft(false);
+  configureWorkflow("create");
+  batchWorkflowOpen=true;
+  $("resetDraftBtn").classList.remove("hide");
+  renderQuestionEditor();
+  clearPasteImport();
+  showBatchEntryMode("choose",false);
+  $("reviewBatch").classList.add("hide");
+  $("editBatch").classList.remove("hide");
+  view("batchBuilder");
+  $("prepareQuestionsBtn").focus();
+}
+function openSelectedBatch(mode){
+  if(!authenticated || !lobbyOpen || !selectedBatch)return;
+  $("settingsStatus").textContent="Loading selected batch…";
+  s.timeout(5000).emit("host:get-batch",selectedBatch,(err,res)=>{
+    if(err || !res?.ok || !res.batch){
+      $("settingsStatus").textContent=err?"Batch preview timed out.":res?.error || "Could not load the selected batch.";
+      return;
+    }
+    editSourceBatchId=String(res.batch.id);
+    batchDraft=draftFromBatch(res.batch);
+    if(!batchDraft.questions.length)batchDraft.questions=[newQuestion()];
+    batchDraftDirty=false;
+    batchWorkflowOpen=true;
+    $("resetDraftBtn").classList.remove("hide");
+    configureWorkflow(mode,res.batch.label);
+    clearPasteImport();
+    showValidation([]);
+    renderReview();
+    if(mode==="preview"){
+      $("editBatch").classList.add("hide");
+      $("reviewBatch").classList.remove("hide");
+      $("builderStatus").textContent="Previewing the selected batch. Choose Edit selected batch to make changes.";
+    }else{
+      renderQuestionEditor();
+      showBatchEntryMode("manual",false);
+      $("reviewBatch").classList.add("hide");
+      $("editBatch").classList.remove("hide");
+      $("builderStatus").textContent="";
+    }
+    view("batchBuilder");
+    (mode==="preview"?$("returnToEditBtn"):$("batchLabel")).focus();
+  });
+}
+function renderBatchOptions(){
+  const select=$("batchSelect");
+  clearNode(select);
+  const placeholder=document.createElement("option");
+  placeholder.value="";
+  placeholder.textContent="Choose a batch";
+  select.append(placeholder);
+  knownBatches.forEach(batch=>{
+    const option=document.createElement("option");
+    option.value=String(batch.id);
+    option.textContent=`${batch.label} (${batch.count} questions)`;
+    select.append(option);
+  });
+  select.value=selectedBatch || "";
+}
+$("createBatchBtn").addEventListener("click",openBatchBuilder);
+$("previewBatchBtn").addEventListener("click",()=>openSelectedBatch("preview"));
+$("editSelectedBatchBtn").addEventListener("click",()=>openSelectedBatch("edit"));
+function updateExternalAiPrompt(){
+  try{
+    if(!globalThis.BatchPromptBuilder?.build)throw new Error("The prompt builder did not load.");
+    const tags=$("batchTags").value.split(",").map(tag=>tag.trim()).filter(Boolean);
+    $("externalAiPrompt").value=globalThis.BatchPromptBuilder.build({
+      brand:currentBrand,
+      label:$("batchLabel").value,
+      tags,
+      count:Number($("promptQuestionCount").value),
+      guidance:$("promptGuidance").value,
+      sourceMode:$("promptSourceMode").value
+    });
+    const deckMode=$("promptSourceMode").value==="slide-deck";
+    $("promptWorkflowHelp").textContent=deckMode
+      ?"Open the presentation in Microsoft 365 Copilot or attach it to the chat, copy this prompt, then paste Copilot's plain-text response below."
+      :"The app does not send content to an AI service. Copy this prompt into any AI tool, then paste its plain-text response below.";
+    $("copyPromptStatus").textContent="";
+  }catch(error){
+    $("externalAiPrompt").value="";
+    $("copyPromptStatus").textContent=error?.message || "Could not prepare the prompt.";
+  }
+}
+$("prepareQuestionsBtn").addEventListener("click",()=>{
+  updateExternalAiPrompt();
+  showBatchEntryMode("paste");
+});
+$("promptQuestionCount").addEventListener("input",updateExternalAiPrompt);
+$("promptGuidance").addEventListener("input",updateExternalAiPrompt);
+$("promptSourceMode").addEventListener("change",updateExternalAiPrompt);
+$("copyExternalAiPromptBtn").addEventListener("click",async()=>{
+  updateExternalAiPrompt();
+  const prompt=$("externalAiPrompt").value;
+  if(!prompt)return;
+  try{
+    await navigator.clipboard.writeText(prompt);
+    $("copyPromptStatus").textContent=$("promptSourceMode").value==="slide-deck"
+      ?"Prompt copied. Use it with the presentation in Microsoft 365 Copilot."
+      :"Prompt copied. Paste it into your preferred AI tool.";
+  }catch{
+    $("externalAiPrompt").focus();
+    $("externalAiPrompt").select();
+    $("copyPromptStatus").textContent="Clipboard access was unavailable. The prompt is selected; copy it manually.";
+  }
+});
+$("backToBatchModesBtn").addEventListener("click",()=>showBatchEntryMode("choose"));
+$("importPastedQuestionsBtn").addEventListener("click",()=>{
+  const source=$("batchPasteText").value;
+  let questions;
+  try{
+    if(!globalThis.BatchTextParser?.parse)throw new Error("The question parser did not load. Refresh the page and try again.");
+    questions=globalThis.BatchTextParser.parse(source,{
+      minQuestions:1,
+      maxQuestions:LIMITS.questions,
+      promptMaxLength:LIMITS.prompt,
+      optionMaxLength:LIMITS.option
+    });
+  }catch(error){
+    const errors=Array.isArray(error?.errors) && error.errors.length
+      ?error.errors
+      :[error?.message || "Check the question format and try again."];
+    showPasteErrors(errors);
+    $("batchPasteText").focus();
+    return;
+  }
+  batchDraft={
+    ...batchDraft,
+    label:$("batchLabel").value,
+    tags:$("batchTags").value,
+    questions
+  };
+  batchDraftDirty=true;
+  renderQuestionEditor();
+  showImportSuccess(questions.length);
+  showBatchEntryMode("manual",false);
+  $("question-0-topic")?.focus();
+});
+$("cancelBuilderBtn").addEventListener("click",()=>returnToLobby(true));
+$("backToLobbyBtn").addEventListener("click",()=>returnToLobby(batchWorkflowMode==="create"));
+$("resetDraftBtn").addEventListener("click",()=>{
+  if(batchDraftDirty && !confirm("Reset all custom batch fields and questions?"))return;
+  const resetCreation=batchWorkflowMode==="create";
+  resetDraft();
+  clearPasteImport();
+  if(resetCreation){
+    showBatchEntryMode("choose");
+    return;
+  }
+  $("batchLabel").focus();
+});
+document.querySelectorAll(".tag-suggestion").forEach(button=>button.addEventListener("click",()=>{
+  syncDraftFromEditor();
+  const tags=parsedTags();
+  if(!tags.some(tag=>tag.toLocaleLowerCase()===button.dataset.tag.toLocaleLowerCase()) && tags.length<LIMITS.tags)tags.push(button.dataset.tag);
+  batchDraft.tags=tags.join(", ");
+  $("batchTags").value=batchDraft.tags;
+  batchDraftDirty=true;
+}));
+$("editBatch").addEventListener("input",event=>{
+  if(event.target.id==="batchPasteText"){
+    clearNode($("batchPasteStatus"));
+    return;
+  }
+  if(["promptSourceMode","promptQuestionCount","promptGuidance"].includes(event.target.id))return;
+  if(["batchLabel","batchTags"].includes(event.target.id))updateExternalAiPrompt();
+  batchDraftDirty=true;
+});
+$("questionCount").addEventListener("change",()=>{
+  syncDraftFromEditor();
+  const count=Math.min(LIMITS.questions,Math.max(1,Number.parseInt($("questionCount").value,10)||1));
+  while(batchDraft.questions.length<count)batchDraft.questions.push(newQuestion());
+  batchDraft.questions.length=count;
+  batchDraftDirty=true;
+  renderQuestionEditor();
+});
+$("addQuestionBtn").addEventListener("click",()=>{
+  syncDraftFromEditor();
+  if(batchDraft.questions.length<LIMITS.questions)batchDraft.questions.push(newQuestion());
+  batchDraftDirty=true;
+  renderQuestionEditor();
+  $(`question-${batchDraft.questions.length-1}-topic`)?.focus();
+});
+$("questionEditor").addEventListener("click",event=>{
+  const button=event.target.closest("button[data-action]");
+  if(!button)return;
+  syncDraftFromEditor();
+  const questionIndex=Number(button.dataset.question);
+  const optionIndex=Number(button.dataset.option);
+  const question=batchDraft.questions[questionIndex];
+  switch(button.dataset.action){
+    case "move-question-up":
+    case "move-question-down":{
+      const next=questionIndex+(button.dataset.action.endsWith("up")?-1:1);
+      [batchDraft.questions[questionIndex],batchDraft.questions[next]]=[batchDraft.questions[next],batchDraft.questions[questionIndex]];
+      break;
+    }
+    case "remove-question": batchDraft.questions.splice(questionIndex,1); break;
+    case "add-option": question.options.push(""); break;
+    case "remove-option":
+      question.options.splice(optionIndex,1);
+      if(question.correctOption===optionIndex)question.correctOption=0;
+      else if(question.correctOption>optionIndex)question.correctOption--;
+      break;
+    case "move-option-up":
+    case "move-option-down":{
+      const next=optionIndex+(button.dataset.action.endsWith("up")?-1:1);
+      [question.options[optionIndex],question.options[next]]=[question.options[next],question.options[optionIndex]];
+      if(question.correctOption===optionIndex)question.correctOption=next;
+      else if(question.correctOption===next)question.correctOption=optionIndex;
+      break;
+    }
+  }
+  batchDraftDirty=true;
+  renderQuestionEditor();
+});
+$("reviewBatchBtn").addEventListener("click",()=>{
+  const errors=validateDraft();
+  showValidation(errors);
+  if(errors.length)return;
+  renderReview();
+  $("editBatch").classList.add("hide");
+  $("reviewBatch").classList.remove("hide");
+  $("builderStatus").textContent="Review complete. Submit when ready or return to edit.";
+  $("returnToEditBtn").focus();
+});
+$("returnToEditBtn").addEventListener("click",()=>{
+  if(batchWorkflowMode==="preview"){
+    batchWorkflowMode="edit";
+    configureWorkflow("edit",batchDraft.label.trim());
+    renderQuestionEditor();
+    showBatchEntryMode("manual",false);
+  }
+  $("reviewBatch").classList.add("hide");
+  $("editBatch").classList.remove("hide");
+  $("builderStatus").textContent="";
+  $("batchLabel").focus();
+});
+function batchPayload(){
+  return {
+    label:batchDraft.label.trim(),
+    questionCount:batchDraft.questions.length,
+    brand:currentBrand,
+    tags:parsedTags(),
+    questions:batchDraft.questions.map(question=>({
+      topic:question.topic.trim(),
+      prompt:question.prompt.trim(),
+      options:question.options.map(option=>option.trim()),
+      correctAnswerIndex:question.correctOption,
+      ...(question.explanation.trim()?{explanation:question.explanation.trim()}: {})
+    }))
+  };
+}
+function finishSavedBatch(saved,message){
+  knownBatches=knownBatches.filter(batch=>String(batch.id)!==String(saved.id));
+  knownBatches.push(saved);
+  selectedBatch=String(saved.id);
+  renderBatchOptions();
+  resetDraft(false);
+  batchWorkflowOpen=false;
+  $("reviewBatch").classList.add("hide");
+  $("editBatch").classList.remove("hide");
+  view("lobby");
+  $("settingsStatus").textContent=message;
+  setSettingsEnabled(true);
+  updateStart();
+  $("batchSelect").focus();
+}
+function createBatchFromDraft(){
+  const payload=batchPayload();
+  $("submitBatchBtn").disabled=true;
+  $("saveAsNewBtn").disabled=true;
+  $("returnToEditBtn").disabled=true;
+  $("builderStatus").textContent="Saving a new batch…";
+  s.timeout(10000).emit("host:create-batch",payload,(err,res)=>{
+    $("submitBatchBtn").disabled=false;
+    $("saveAsNewBtn").disabled=false;
+    $("returnToEditBtn").disabled=false;
+    if(err || !res?.ok || !res.batch?.id){
+      $("builderStatus").textContent=err?"Batch creation timed out. Try again.":res?.error || "Could not create the batch.";
+      return;
+    }
+    const created=res.batch;
+    $("builderStatus").textContent="Batch created. Selecting it for this lobby…";
+    s.timeout(5000).emit("host:select-batch",created.id,(selectErr,selectRes)=>{
+      if(selectErr || !selectRes?.ok){
+        $("builderStatus").textContent=selectErr?"Batch created, but selection timed out. Return to the lobby and select it.":selectRes?.error || "Batch created, but it could not be selected.";
+        return;
+      }
+      finishSavedBatch(created,`${created.label} (${created.count} questions) created and selected.`);
+    });
+  });
+}
+function updateSelectedBatch(){
+  if(!editSourceBatchId || editSourceBatchId!==selectedBatch){
+    $("builderStatus").textContent="The selected batch changed. Return to the lobby and reopen it before updating.";
+    return;
+  }
+  const payload={id:editSourceBatchId,...batchPayload()};
+  $("submitBatchBtn").disabled=true;
+  $("saveAsNewBtn").disabled=true;
+  $("returnToEditBtn").disabled=true;
+  $("builderStatus").textContent="Updating the selected batch…";
+  s.timeout(10000).emit("host:update-batch",payload,(err,res)=>{
+    $("submitBatchBtn").disabled=false;
+    $("saveAsNewBtn").disabled=false;
+    $("returnToEditBtn").disabled=false;
+    if(err || !res?.ok || !res.batch?.id){
+      $("builderStatus").textContent=err?"Batch update timed out. Try again.":res?.error || "Could not update the selected batch.";
+      return;
+    }
+    finishSavedBatch(res.batch,`${res.batch.label} updated and remains selected.`);
+  });
+}
+$("submitBatchBtn").addEventListener("click",()=>{
+  if(batchWorkflowMode==="edit")updateSelectedBatch();
+  else createBatchFromDraft();
+});
+$("saveAsNewBtn").addEventListener("click",createBatchFromDraft);
+function requestOtp(){
+  const email=($("hostEmail").value||"").trim().toLowerCase();
+  if(!/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+$/.test(email)){
+    $("authError").textContent="Use an exact work email address from an allowed domain.";
+    $("hostEmail").focus();
+    return;
+  }
+  clearInterval(otpCooldownTimer);
+  $("authBtn").disabled=true;
+  $("requestOtpBtn").disabled=true;
+  $("authError").textContent="Sending code…";
+  s.timeout(OTP_REQUEST_TIMEOUT_MS).emit("host:request-otp", email, (err, res)=>{
+    if(err){
+      $("authBtn").disabled=false;
+      $("requestOtpBtn").disabled=false;
+      $("authError").textContent="Code request timed out. Try again.";
+      return;
+    }
+    if(!res || !res.ok){
+      $("authError").textContent=(res && res.error) || "Could not send the access code.";
+      if(res?.retryAfterSeconds){
+        if(hostChallengeId)$("authBtn").disabled=false;
+        startOtpCooldown(res.retryAfterSeconds,hostChallengeId?$("requestOtpBtn"):$("authBtn"));
+      }
+      else{
+        $("authBtn").disabled=false;
+        $("requestOtpBtn").disabled=false;
+      }
+      return;
+    }
+    hostEmail=email;
+    hostChallengeId=String(res.challengeId||"");
+    $("hostEmail").value=email;
+    $("hostEmail").readOnly=true;
+    const expiryMinutes=Math.max(1,Math.ceil((Number(res.expiresInSeconds)||600)/60));
+    $("authError").textContent=`Code sent to ${res.email||email}. It expires in ${expiryMinutes} minute${expiryMinutes===1?"":"s"}.`;
+    $("hostOtp").classList.remove("hide");
+    $("hostOtp").focus();
+    $("authBtn").textContent="Verify code";
+    $("authBtn").disabled=false;
+    $("requestOtpBtn").classList.remove("hide");
+    startOtpCooldown(Number(res.retryAfterSeconds)||60,$("requestOtpBtn"));
+  });
+}
+function startOtpCooldown(seconds,button){
+  clearInterval(otpCooldownTimer);
+  let remaining=Math.max(1,Math.ceil(seconds));
+  const readyText=button===$("authBtn")?"Send code":"Send new code";
+  button.disabled=true;
+  button.textContent=`Try again in ${remaining}s`;
+  otpCooldownTimer=setInterval(()=>{
+    remaining-=1;
+    if(remaining>0){
+      button.textContent=`Try again in ${remaining}s`;
+      return;
+    }
+    clearInterval(otpCooldownTimer);
+    button.disabled=false;
+    button.textContent=readyText;
+  },1000);
+}
+function authenticate(){
+  if(!s.connected){lock("Connection lost. Reconnecting…");return;}
+  const otp=$("hostOtp").value.trim();
+  if(!hostEmail || !hostChallengeId){
+    $("authError").textContent="Request an access code first.";
+    $("hostEmail").focus();
+    return;
+  }
+  if(!/^\d{6}$/.test(otp)){
+    $("authError").textContent="Enter the 6-digit code from your email.";
+    $("hostOtp").focus();
+    return;
+  }
+  $("authBtn").disabled=true;
+  $("authError").textContent="Authenticating…";
+  s.timeout(5000).emit("host:join", {type:"otp",challengeId:hostChallengeId,otp}, (err, res)=>{
+    if(!s.connected)return;
+    $("authBtn").disabled=false;
+    if(err){lock("Authentication timed out. Try again.");return;}
+    if(!res || !res.ok){
+      $("hostOtp").value="";
+      $("authError").textContent=(res && res.error) || "Could not authenticate.";
+      if(/expired|too many/i.test($("authError").textContent)){
+        resetOtpStep();
+        $("hostEmail").focus();
+      }else $("hostOtp").focus();
+      return;
+    }
+    hostEmail=String((res && res.email) || hostEmail || "");
+    hostChallengeId="";
+    $("hostEmail").value="";
+    $("hostEmail").readOnly=false;
+    $("hostOtp").value="";
+    $("hostOtp").classList.add("hide");
+    activateHostSession(res);
+  });
+}
+function authenticateManualCode(){
+  if(!s.connected){lock("Connection lost. Reconnecting…");return;}
+  const email=($("hostEmail").value||"").trim().toLowerCase();
+  const code=$("hostOtp").value.trim();
+  if(!/^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@(github\.com|microsoft\.com)$/.test(email)){
+    $("authError").textContent="Use the exact work email tied to the admin-provided code.";
+    $("hostEmail").focus();
+    return;
+  }
+  if(!/^\d{6}$/.test(code)){
+    $("authError").textContent="Enter the 6-digit code provided by the administrator.";
+    $("hostOtp").focus();
+    return;
+  }
+  $("authBtn").disabled=true;
+  $("authError").textContent="Authenticating…";
+  s.timeout(5000).emit("host:join",{type:"admin-code",email,code},(err,res)=>{
+    if(!s.connected)return;
+    $("authBtn").disabled=false;
+    if(err){lock("Authentication timed out. Try again.");return;}
+    if(!res?.ok){
+      $("hostOtp").value="";
+      $("authError").textContent=res?.error||"Could not authenticate.";
+      $("hostOtp").focus();
+      return;
+    }
+    hostEmail=String(res.email||email);
+    $("hostEmail").value="";
+    $("hostOtp").value="";
+    $("hostOtp").classList.add("hide");
+    activateHostSession(res);
+  });
+}
+$("requestOtpBtn").addEventListener("click", requestOtp);
+$("manualCodeBtn").addEventListener("click",()=>{
+  if(manualCodeMode){
+    resetOtpStep();
+    $("authError").textContent="Use an approved work email to receive a one-time access code.";
+    $("hostEmail").focus();
+    return;
+  }
+  clearInterval(otpCooldownTimer);
+  manualCodeMode=true;
+  hostChallengeId="";
+  hostEmail="";
+  $("hostEmail").readOnly=false;
+  $("hostOtp").value="";
+  $("hostOtp").classList.remove("hide");
+  $("hostOtp").placeholder="Admin-provided 6-digit code";
+  $("authBtn").textContent="Verify admin code";
+  $("requestOtpBtn").classList.add("hide");
+  $("manualCodeBtn").textContent="Use email code instead";
+  $("authError").textContent="Enter the exact work email and single-use code provided by the administrator.";
+  $("hostEmail").focus();
+});
+$("authForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  if(manualCodeMode)authenticateManualCode();
+  else if(hostChallengeId)authenticate();
+  else requestOtp();
+});
+
+s.on("connect", ()=>{
+  resetOtpStep();
+  const saved=savedHostSession();
+  if(!saved){
+    lock("Use your GitHub or Microsoft work email to sign in.");
+    return;
+  }
+  $("authError").textContent="Restoring your quiz session…";
+  s.timeout(10000).emit("host:resume-session",saved,(err,res)=>{
+    if(!s.connected)return;
+    if(err||!res?.ok){
+      clearHostSession();
+      lock(err?"Could not restore the saved session. Sign in again.":res?.error||"Saved session expired. Sign in again.");
+      return;
+    }
+    hostResumeToken=saved.token;
+    activateHostSession(res);
+  });
+});
+s.on("disconnect", ()=>lock("Connection lost. Reconnecting to your quiz session…"));
+s.on("session:expired",()=>{
+  clearHostSession();
+  lock("This quiz session expired after 24 hours of inactivity. Sign in to create a new session.");
+});
+let joinUrl="",shareQrDataUrl="";
+function setQrStatus(message,isError){
+  $("qrStatus").textContent=message;
+  $("qrStatus").style.color=isError?"var(--red)":"";
+}
+function enableQrActions(enabled){
+  for(const id of ["downloadQrBtn","copyJoinLinkBtn","largeQrBtn"])$(id).disabled=!enabled;
+}
+function loadShareLinks(){
+  joinUrl="";
+  shareQrDataUrl="";
+  enableQrActions(false);
+  $("joinurl").textContent="Preparing this session's join link…";
+  const query=`session=${encodeURIComponent(hostSessionId)}`;
+  fetch(`/qr?${query}`).then(r=>{if(!r.ok)throw Error();return r.json();}).then(d=>{
+    $("qrimg").src=d.dataUrl;
+    joinUrl=d.url;
+    $("joinurl").textContent=d.url.replace(/^https?:\/\//,'');
+    enableQrActions(true);
+    return fetch(`/qr?${query}&size=1024`).then(r=>r.ok?r.json():null).then(share=>{
+      if(share&&share.dataUrl)shareQrDataUrl=share.dataUrl;
+    }).catch(()=>{});
+  }).catch(()=>{$("joinurl").textContent="Join link unavailable — restore or create a new session.";});
+}
+
+$("downloadQrBtn").addEventListener("click",()=>{
+  const source=shareQrDataUrl||$("qrimg").src;
+  if(!source){setQrStatus("QR code is not ready yet.",true);return;}
+  const link=document.createElement("a");
+  link.href=source;
+  link.download="solution-engineer-quiz-join-qr.png";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setQrStatus("QR code downloaded.");
+});
+$("copyJoinLinkBtn").addEventListener("click",async()=>{
+  if(!joinUrl){setQrStatus("Join link is not ready yet.",true);return;}
+  try{
+    if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(joinUrl);
+    else{
+      const field=document.createElement("textarea");
+      field.value=joinUrl;
+      field.setAttribute("readonly","");
+      field.style.position="fixed";
+      field.style.opacity="0";
+      document.body.appendChild(field);
+      field.select();
+      const copied=document.execCommand("copy");
+      field.remove();
+      if(!copied)throw new Error("copy rejected");
+    }
+    setQrStatus("Join link copied.");
+  }catch{
+    setQrStatus(`Copy failed. Share this link: ${joinUrl}`,true);
+  }
+});
+function closeQrOverlay(){
+  $("qrOverlay").classList.add("hide");
+  $("largeQrBtn").focus();
+}
+$("largeQrBtn").addEventListener("click",()=>{
+  const source=shareQrDataUrl||$("qrimg").src;
+  if(!source){setQrStatus("QR code is not ready yet.",true);return;}
+  $("qrOverlayImg").src=source;
+  $("qrOverlayUrl").textContent=joinUrl.replace(/^https?:\/\//,'');
+  $("qrOverlay").classList.remove("hide");
+  $("closeQrOverlayBtn").focus();
+});
+$("closeQrOverlayBtn").addEventListener("click",closeQrOverlay);
+$("qrOverlay").addEventListener("click",e=>{if(e.target===$("qrOverlay"))closeQrOverlay();});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&!$("qrOverlay").classList.contains("hide"))closeQrOverlay();
+});
+
+function syncFullscreen(){
+  const active=Boolean(document.fullscreenElement);
+  document.documentElement.dataset.presenting=active?"true":"false";
+  $("fullscreenBtn").setAttribute("aria-pressed",active?"true":"false");
+  $("fullscreenBtn").textContent=active?"⛶ Exit full screen":"⛶ Full screen";
+}
+$("fullscreenBtn").addEventListener("click",async()=>{
+  try{
+    if(document.fullscreenElement)await document.exitFullscreen();
+    else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();
+    else{setQrStatus("Full screen is not supported in this browser.",true);return;}
+  }catch{
+    setQrStatus("Full screen was blocked by the browser.",true);
+  }
+  syncFullscreen();
+});
+document.addEventListener("fullscreenchange",syncFullscreen);
+$("logoutHostBtn").addEventListener("click",()=>{
+  logoutHostSession();
+});
+
+s.on("lobby", d=>{
+  applyBrand(d.brand);
+  playerCount=Number(d.count)||0;
+  selectedBatch=d.batchId==null?null:String(d.batchId);
+  lobbyOpen=d.phase==="lobby";
+  knownBatches=Array.isArray(d.batches)?d.batches:[];
+  $("pcount").textContent=String(playerCount);
+  renderBatchOptions();
+  const select=$("batchSelect");
+  if(document.activeElement!==$("durationInput"))$("durationInput").value=d.duration;
+  if (d.visibility) {
+    currentVisibility = normalizeVisibility(d.visibility);
+    applyVisibilitySettings(currentVisibility);
+  }
+  setSettingsEnabled(authenticated && lobbyOpen);
+  updateStart();
+  if(lobbyOpen && !batchWorkflowOpen){
+    view("lobby");
+    $("settingsStatus").textContent=selectedBatch && select.selectedOptions[0]?`${select.selectedOptions[0].textContent} selected.`:"Choose a batch before starting.";
+  }
+const box=$("playerchips");
+clearNode(box);
+const players=Array.isArray(d.players)?d.players:[];
+if(!players.length)box.append(makeNode("span","empty","Waiting for players…"));
+else players.forEach(player=>box.append(makeNode("span","chip",player.name)));
+});
+
+s.on("question", q=>{
+  applyBrand(q.brand);
+  lobbyOpen=false;
+  setSettingsEnabled(false);
+  updateStart();
+  view("question");
+  $("qexplain").classList.add("hide");
+  $("nextBtn").classList.add("hide"); $("skipBtn").classList.remove("hide");
+  $("qtag").textContent=q.topic; $("qtag").style.color=""; 
+  $("qnum").textContent=`Q${q.index+1} / ${q.total}`;
+  $("qtext").textContent=q.q;
+  clearNode($("qopts"));
+  q.o.forEach((option,index)=>{
+    const answer=makeNode("div","opt");
+    answer.dataset.i=String(index);
+    answer.append(
+      makeNode("span",`k k${index}`,String.fromCharCode(65+index)),
+      makeNode("span","answer-text",option),
+      makeNode("span","cnt","")
+    );
+    $("qopts").append(answer);
+  });
+  $("acount").textContent="0"; $("atotal").textContent=$("pcount").textContent;
+  runTimer(q.remainingMs, q.duration);
+});
+
+s.on("answered", d=>{ $("acount").textContent=d.answered; $("atotal").textContent=d.total; });
+
+s.on("reveal", d=>{
+  clearInterval(timerInt); $("qtimer").style.width="0%"; $("hostClock").textContent="00:00";
+  const opts=[...document.querySelectorAll('#qopts .opt')];
+  const totalAns=d.dist.reduce((a,b)=>a+b,0)||1;
+  opts.forEach((el,i)=>{
+    el.querySelector('.cnt').textContent=`${d.dist[i]} · ${Math.round(d.dist[i]/totalAns*100)}%`;
+    if(i===d.correct)el.classList.add('correct'); else el.classList.add('dim');
+  });
+  if(d.explanation){
+    $("qexplain").textContent="💡 "+d.explanation;
+    $("qexplain").classList.remove("hide");
+  }else{
+    $("qexplain").textContent="";
+    $("qexplain").classList.add("hide");
+  }
+  $("skipBtn").classList.add("hide"); $("nextBtn").classList.remove("hide");
+  $("nextBtn").textContent = d.last ? "See final results 🏁" : "Show leaderboard →";
+  // stash leaderboard to show on next click via board view
+  window._lb=d.leaderboard; window._last=d.last;
+  $("nextBtn").onclick=()=>{ if(window._last){ control('host:next'); } else { showBoard(window._lb); } };
+});
+
+function showBoard(lb){
+  view("board");
+  clearNode($("lbrows"));
+  lb.forEach((result,index)=>$("lbrows").append(rowNode(result,index)));
+}
+s.on("end", d=>{
+  view("end");
+  const medals=["🥇","🥈","🥉"];
+  const order=[1,0,2]; // second, first, third for visual podium
+  const cls=["first","second","third"];
+  clearNode($("podium"));
+  order.forEach(position=>{
+    const result=d.podium[position];
+    if(!result)return;
+    const pod=makeNode("div",`pod ${cls[position]}`);
+    pod.append(
+      makeNode("div","medal",medals[position]),
+      makeNode("div","nm",result.name),
+      makeNode("div","pts",`${result.score} pts`)
+    );
+    $("podium").append(pod);
+  });
+  clearNode($("lbrowsEnd"));
+  d.leaderboard.forEach((result,index)=>$("lbrowsEnd").append(rowNode(result,index)));
+  confettiBurst();
+});
+s.on("reset", d=>{
+  applyBrand(d?.brand);
+  clearInterval(timerInt); selectedBatch=null; lobbyOpen=true; batchWorkflowOpen=false;
+  $("batchSelect").value=""; $("durationInput").value=20;
+  setSettingsEnabled(authenticated); updateStart();
+  $("settingsStatus").textContent="Choose a batch before starting.";
+  view("lobby");
+});
+
+function rowNode(result,index){
+  const place=index<3?` p${index+1}`:"";
+  const row=makeNode("div",`lbrow${place}`);
+  row.append(
+    makeNode("span","pos",String(index+1)),
+    makeNode("span","nm",result.name),
+    makeNode("span","pts",String(result.score))
+  );
+  return row;
+}
+
+function runTimer(remainingMs,dur){
+  const bar=$("qtimer"),clock=$("hostClock"),deadline=performance.now()+remainingMs;
+  clearInterval(timerInt);
+  function tick(){
+    const left=Math.max(0,deadline-performance.now()),seconds=Math.ceil(left/1000),pct=left/(dur*1000)*100;
+    clock.textContent=`${String(Math.floor(seconds/60)).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}`;
+    bar.style.width=pct+"%";
+    bar.style.background=pct>50?"var(--green)":pct>25?"var(--yellow)":"var(--red)";
+    if(left<=0)clearInterval(timerInt);
+  }
+  tick();
+  timerInt=setInterval(tick,100);
+}
+// confetti
+const cvs=$("confetti"),ctx=cvs.getContext("2d");
+function size(){cvs.width=innerWidth;cvs.height=innerHeight;}size();addEventListener("resize",size);
+let parts=[];
+function confettiBurst(){
+  const cols=currentBrand==="microsoft"
+    ?["#f25022","#7fba00","#00a4ef","#ffb900","#50a7f8","#f5f9ff"]
+    :["#3fb950","#58a6ff","#a371f7","#db6d28","#f778ba","#e3b341"];
+  parts=[];for(let i=0;i<220;i++)parts.push({x:innerWidth/2,y:innerHeight/3,vx:(Math.random()-.5)*14,vy:Math.random()*-16-4,g:.4+Math.random()*.3,s:6+Math.random()*8,c:cols[i%cols.length],r:Math.random()*6,vr:(Math.random()-.5)*.5});
+  cancelAnimationFrame(confettiBurst._r);cloop();
+}
+function cloop(){ctx.clearRect(0,0,cvs.width,cvs.height);let alive=false;
+  for(const p of parts){p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;if(p.y<cvs.height+20)alive=true;
+    ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);ctx.restore();}
+  if(alive)confettiBurst._r=requestAnimationFrame(cloop);else ctx.clearRect(0,0,cvs.width,cvs.height);}
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+# GitHub Copilot Quiz – Batch 3
+
+### 1\. Copilot Agent Mode
+
+**Question:** Which GitHub Copilot mode can autonomously determine which files to modify and run commands while completing a development task?
+
+**Answer:** Agent mode
+
+---
+
+### 2\. Copilot Context
+
+**Question:** In Visual Studio Code, which context variable can you use to explicitly reference a specific file in a Copilot Chat prompt?
+
+**Answer:** \#file
+
+---
+
+### 3\. Copilot Custom Instructions
+
+**Question:** Which repository file can provide repository\-wide custom instructions to GitHub Copilot?
+
+**Answer:** .github/copilot\-instructions.md
+
+---
+
+### 4\. Copilot Custom Agents
+
+**Question:** In which repository directory are repository\-level GitHub Copilot custom agent profile files stored?
+
+**Answer:** .github/agents/
+
+---
+
+### 5\. Copilot Custom Agents
+
+**Question:** What file extension is used for a GitHub Copilot custom agent profile?
+
+**Answer:** .agent.md
+
+---
+
+### 6\. Copilot Code Review
+
+**Question:** Which GitHub Copilot capability can review pull requests and suggest code changes?
+
+**Answer:** GitHub Copilot code review
+
+---
+
+### 7\. Copilot Code Review
+
+**Question:** By default, does a GitHub Copilot code review count as an approval toward required pull request approvals?
+
+**Answer:** No. By default, Copilot leaves a **Comment** review rather than an **Approve** review.
+
+---
+
+### 8\. Copilot and MCP
+
+**Question:** What does MCP stand for when used to extend GitHub Copilot with external tools and services?
+
+**Answer:** Model Context Protocol
+
+---
+
+### 9\. Copilot and MCP
+
+**Question:** Which two MCP servers are configured by default for GitHub Copilot cloud agent?
+
+**Answer:** GitHub MCP server and Playwright MCP server
+
+---
+
+### 10\. Copilot CLI
+
+**Question:** Which slash command can be used to authenticate from GitHub Copilot CLI when you are not already signed in?
+
+**Answer:** /login
+
+---
+
+### 11\. Copilot Model Selection
+
+**Question:** What GitHub Copilot feature automatically routes a task to an appropriate supported AI model based on factors such as task complexity and model availability?
+
+**Answer:** Auto model selection
+
+---
+
+### 12\. Copilot Cloud Agent
+
+**Question:** What type of development environment does GitHub Copilot cloud agent use when working on a coding task?
+
+**Answer:** An ephemeral development environment powered by GitHub Actions.
+
