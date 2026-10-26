@@ -8,8 +8,9 @@ are not part of the hands-on event.
 - Node.js 22 LTS with npm, Git, and VS Code.
 - GitHub Copilot access in VS Code, signed in and able to use Chat agent tools.
 - PowerShell on Windows, or Bash on macOS/Linux.
+- Python 3.11+, uv, and the current Specify CLI (installation below).
 - A local checkout of the `spec-workshop` branch.
-- Internet access for Copilot and initial dependency installation.
+- Internet access for Copilot, package installation, and Spec Kit initialization.
 
 There is no Redis server, Docker, database, GitHub Actions setup, cloud account,
 or healthcare-service credential to configure.
@@ -50,39 +51,40 @@ Stop the development processes before running `npm test`: the starter imports
 and starts its API listener during tests, so another process on port 3000 can
 cause a conflict. Use separate terminal windows for editing and development.
 
-## 2. Use the pinned Spec Kit scaffolding
+## 2. Install the tool, not the project scaffolding
 
-This branch uses the official **Spec Kit v0.0.90 Copilot prompt layout**, checked
-in from its standalone release templates. It is deliberately pinned rather than
-tracking the latest installation layout.
-
-The generated prompt files and local scripts are already included. Participants
-do not need Python, uv, the Specify CLI, or a fresh Spec Kit installation.
-Do not run `specify init --force` over this branch.
-
-In VS Code Copilot Chat, type `/speckit` and confirm these prompt commands appear:
+Install Python 3.11+ and uv using the
+[official installation guide](https://github.github.io/spec-kit/installation.html).
+Then run in a terminal:
 
 ```text
-/speckit.specify
-/speckit.clarify
-/speckit.plan
-/speckit.tasks
-/speckit.implement
-/speckit.analyze
+python --version
+uv --version
+uv tool install specify-cli
+specify version
+specify init --help
 ```
 
-These are **chat prompt commands**, not terminal commands. The core uses specify,
-plan, tasks, and implement; clarify resolves actual questions, and analyze is an
-optional consistency aid. This pinned release does not use the newer
-`/speckit-<command>` skills layout or require a converge command.
+If uv reports that Specify is already installed, compare `specify version` with
+the current official release. Upgrade that uv-managed installation with
+`uv tool upgrade specify-cli` if needed, then check the version again. If another
+tool installed Specify, follow the official upgrade guide for that tool instead
+of creating a second installation.
 
-Open the supplied `.specify\memory\constitution.md`. It provides project rules;
-you do not need to generate a new constitution during the core event.
+The current CLI help must include `--here`, `--integration`, and `--script`.
+This workshop uses the default Copilot skills layout, with `/speckit-...`
+commands, not the older `/speckit.*` prompt layout. Facilitators verify a common
+current version before the event; do not upgrade midway through the exercise.
 
-The agent definitions include Windows PowerShell and Bash command alternatives.
-Use the matching command for your operating system; do not change execution policy
-or bypass shell/tool permission controls. Provenance and local adaptations are
-documented in [the upstream notice](../.specify/UPSTREAM.md).
+**Do not run `specify init` in this checkout yet.** Participants initialize the
+existing repository and generate its constitution during the core workshop.
+This starter deliberately contains no generated `.specify` files or Spec Kit
+skills, agents, or prompts. Missing `/speckit-...` skills before initialization
+is expected.
+
+The event needs network access to official Spec Kit sources. Resolve proxy,
+certificate, package-index, or account-access problems before the event using
+approved configuration; do not disable TLS or tool approval controls.
 
 ## 3. Verify the custom reviewer
 
@@ -96,9 +98,9 @@ belongs to the normal implementation session.
 
 ## Ready means
 
-The app runs locally, baseline checks work, Spec Kit prompts are discoverable,
-the constitution is present, and the reviewer can be selected. Tell the
-facilitator about a setup blocker before the event.
+The app runs locally, baseline checks work, the current Specify CLI is available,
+and the reviewer can be selected. The repository is still uninitialized for
+Spec Kit. Tell the facilitator about a setup blocker before the event.
 
 If blocked during the workshop, use [reference recovery](reference/README.md)
 without discarding your work.

@@ -22,8 +22,8 @@ choices, implementation, and evidence.
 3. Ask Copilot to reconcile your active artifact with the approved contract, and
    review the proposed changes yourself before proceeding.
 4. If your checkout is unusable, make a separate clone of the repository, check
-   out `spec-workshop`, and complete prework there. Do not reset or clean your
-   original checkout.
+   out `spec-workshop`, complete prework, and repeat the initialization and
+   constitution checkpoint there. Do not reset or clean your original checkout.
 5. Do not copy an authentication token, environment file, or member data into a
    recovery checkout.
 

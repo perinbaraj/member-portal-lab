@@ -4,9 +4,10 @@
 Portal to practice a complete, bounded AI-assisted development lifecycle in
 VS Code with GitHub Copilot Chat.
 
-This branch intentionally does not implement the claims-filter feature. Learners
-write the specification, review the plan and tasks, implement the change, and
-decide whether to accept the result.
+This branch intentionally contains neither generated Spec Kit scaffolding nor
+the claims-filter implementation. Learners initialize Spec Kit in the existing
+repository, create the constitution, write the specification, review the plan
+and tasks, implement the change, and decide whether to accept the result.
 
 ## Choose a path
 
@@ -26,10 +27,11 @@ inside the event. Completing optional work is not a condition of core completion
 ## What you will practice
 
 1. Inspect brownfield code and repository instructions.
-2. Turn a requirement into a specification, implementation plan, and tasks.
-3. Use bounded Copilot agent execution to implement and test those tasks.
-4. Customize one read-only reviewer agent.
-5. Evaluate evidence and make a human acceptance decision.
+2. Initialize Spec Kit in place and establish project guardrails.
+3. Turn a requirement into a specification, implementation plan, and tasks.
+4. Use bounded Copilot agent execution to implement and test those tasks.
+5. Customize one read-only reviewer agent.
+6. Evaluate evidence and make a human acceptance decision.
 
 Here, "agentic workflow" means this sequential execution and handoff. It does not
 mean GitHub Actions, a parallel agent fleet, or unattended permission bypasses.

@@ -42,10 +42,10 @@ and compose a draft so I can prepare an appeal without submitting it.
 
 ## Activity 1: specify and challenge assumptions
 
-Use Spec Kit's `/speckit.specify` prompt with the requirement and contract above.
+Use Spec Kit's `/speckit-specify` skill with the requirement and contract above.
 
 ```text
-/speckit.specify
+/speckit-specify
 Specify appeal eligibility and an ephemeral UI draft for the existing Member
 Portal. Treat workshops/optional/claim-appeals.md as the scope contract. No appeal
 submission, mutation endpoint, persistence, external infrastructure, new packages,
@@ -61,10 +61,10 @@ validation, and draft-clearing cases.
 
 ## Activity 2: plan and decompose
 
-Use `/speckit.plan`, then `/speckit.tasks`:
+Use `/speckit-plan`, then `/speckit-tasks`:
 
 ```text
-/speckit.plan
+/speckit-plan
 Plan the approved optional appeals exercise using the existing Express/Zod
 backend, typed HTTP client, React components, and Vitest/Supertest. Add only the
 read-only eligibility route and temporary UI draft. Keep the completed core
@@ -79,7 +79,7 @@ typed API method, draft component/state lifecycle, API tests, and browser checks
 
 ## Activity 3: implement and test
 
-Run `/speckit.implement` on the approved tasks. Inspect the diff and run existing
+Run `/speckit-implement` on the approved tasks. Inspect the diff and run existing
 test/build/typecheck commands.
 
 Add focused API cases for:
@@ -92,6 +92,9 @@ Add focused API cases for:
 
 Do not assert exact production log prose or expose identifiers in test logs.
 Use synthetic fixtures and restore all mocks.
+
+Run `/speckit-converge`, review remaining in-scope tasks, and repeat implementation
+and convergence until the approved feature converges with evidence.
 
 ## Activity 4: customize the reviewer and validate
 

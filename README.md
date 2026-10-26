@@ -7,9 +7,11 @@ A lean healthcare member portal (Express API + React frontend) used as the base 
 The `spec-workshop` branch is an **unfinished learner starter**, not a completed
 solution. Start with the [workshop guide](workshops/README.md).
 
-- **Core:** one claims status-filter/pagination change, from Spec Kit specification
-  through implementation, testing, a custom reviewer agent, and human acceptance.
-  Designed for the 3-3.5-hour event; setup is prework.
+- **Core:** start with the brownfield app, initialize Spec Kit, create project
+  guardrails, then carry one claims status-filter/pagination change through
+  specification, implementation, testing, a custom reviewer, and human acceptance.
+  Designed for the 3-3.5-hour event; tool installation is prework, initialization
+  is hands-on.
 - **Optional:** [multiple custom agents](workshops/optional/custom-agents.md) and
   [appeal eligibility and drafting](workshops/optional/claim-appeals.md).
   Neither is required to complete the core workshop.

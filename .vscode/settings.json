@@ -1,8 +1,0 @@
-{
-  "chat.promptFilesRecommendations": {
-    "speckit.specify": true,
-    "speckit.plan": true,
-    "speckit.tasks": true,
-    "speckit.implement": true
-  }
-}
