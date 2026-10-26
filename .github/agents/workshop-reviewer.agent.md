@@ -6,7 +6,7 @@ tools: ['read', 'search']
 
 Review only the feature and files identified by the participant.
 Read the repository instructions, feature specification, plan, tasks, diff, and
-the test evidence supplied by the participant. Do not inspect lab-guide.
+the test evidence supplied by the participant.
 
 You are read-only. Do not edit files, execute commands, create commits, approve a
 change, or claim that tests ran unless their results were actually supplied.

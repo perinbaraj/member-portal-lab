@@ -1,7 +1,8 @@
 # Optional workshop: build a small role-specific agent team
 
-**Not part of the core event.** Start with the reviewed core specification and
-plan. You may do this before implementing the core code; testing/review activities
+**Follow-on work, outside the core and its buffer.** Start with the
+[reviewed core specification and plan](../steps/04-plan-and-tasks.md).
+You may do this before implementing the core code; testing/review activities
 can continue once an implementation exists.
 
 Use the same VS Code Copilot Chat session tools. No hosted workflow, GitHub
@@ -36,7 +37,7 @@ name: workshop-analyst
 description: Challenge the workshop requirement and return reviewable acceptance criteria.
 tools: ['read', 'search']
 ---
-Read the requested feature and repository instructions, excluding lab-guide.
+Read the requested feature and repository instructions.
 Do not edit files, execute commands, or implement.
 Return unresolved questions, acceptance criteria, exclusions, and relevant files.
 Distinguish facts observed in code from assumptions. Stop after this handoff.
@@ -59,7 +60,7 @@ description: Add focused workshop tests and report results without editing produ
 tools: ['read', 'search', 'edit', 'execute']
 ---
 Read the approved spec, plan, repository instructions, and existing test file.
-Do not inspect lab-guide. Edit only tests for the requested feature.
+Edit only tests for the requested feature.
 Use the existing runner; do not install packages, weaken checks, modify production
 code, change tool permissions, commit, or push.
 Run focused tests through normal approval controls and report actual results.
@@ -101,3 +102,6 @@ agent having access to an earlier chat's hidden context.
 Record one example where you corrected an agent's assumption or rejected a
 finding. **Done** means the role boundaries worked and the handoffs helped, not
 that the team generated the most files or invoked the most agents.
+
+[Workshop home](../README.md) |
+[Core review and acceptance](../steps/06-review-and-accept.md)

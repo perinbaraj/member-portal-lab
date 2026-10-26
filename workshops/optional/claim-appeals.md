@@ -1,6 +1,7 @@
 # Optional workshop: appeal eligibility and an in-memory draft
 
-**Not part of the core event.** Start from your accepted claims-filter feature.
+**Follow-on work, outside the core and its buffer.** Start from your
+[accepted claims-filter feature](../steps/06-review-and-accept.md).
 Create a separate learner branch if you want to keep the core outcome unchanged.
 
 This is a complete, bounded read-only-and-UI exercise, not an appeal-submission
@@ -48,8 +49,8 @@ Use Spec Kit's `/speckit-specify` skill with the requirement and contract above.
 /speckit-specify
 Specify appeal eligibility and an ephemeral UI draft for the existing Member
 Portal. Treat workshops/optional/claim-appeals.md as the scope contract. No appeal
-submission, mutation endpoint, persistence, external infrastructure, new packages,
-or lab-guide changes. Identify ownership and draft-lifetime acceptance criteria.
+submission, mutation endpoint, persistence, external infrastructure, or new packages.
+Identify ownership and draft-lifetime acceptance criteria.
 Generate the specification only.
 ```
 
@@ -113,3 +114,6 @@ Manually verify:
 
 **Done:** the read-only eligibility contract, focused tests, temporary draft,
 review, and human acceptance all pass. Actual appeal submission remains absent.
+
+[Workshop home](../README.md) |
+[Core acceptance contract](../acceptance.md)

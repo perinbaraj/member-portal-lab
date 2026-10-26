@@ -5,25 +5,33 @@ A lean healthcare member portal (Express API + React frontend) used as the base 
 ## Spec-driven workshop
 
 The `spec-workshop` branch is an **unfinished learner starter**, not a completed
-solution. Start with the [workshop guide](workshops/README.md).
+solution. **[Start here: setup and the linked workshop steps](workshops/README.md#start-here).**
 
 - **Core:** start with the brownfield app, initialize Spec Kit, create project
   guardrails, then carry one claims status-filter/pagination change through
   specification, implementation, testing, a custom reviewer, and human acceptance.
-  Designed for the 3-3.5-hour event; tool installation is prework, initialization
-  is hands-on.
+  The event has a tentative three-hour core plus a one-hour completion buffer.
+  Tool installation is prework; initialization is hands-on. Review and adapt
+  supplied spec/plan examples rather than starting from a blank page.
 - **Optional:** [multiple custom agents](workshops/optional/custom-agents.md) and
   [appeal eligibility and drafting](workshops/optional/claim-appeals.md).
   Neither is required to complete the core workshop.
 - **Infrastructure:** local runtimes and development tools only. No Redis server,
   database, Docker, GitHub Actions, paid cloud resources, or external healthcare APIs.
 
-Keep the existing `lab-guide` materials separate from this workshop.
+The [six-step roadmap](workshops/core.md) links to detailed commands, Chat
+prompts, expected outputs, and recovery instructions for each checkpoint.
+The [acceptance contract](workshops/acceptance.md) defines the feature learners
+will implement. This branch contains one workshop journey, not a two-day lab pack.
 
 ## Quick Start
 
+For workshop readiness, follow [prework](workshops/prework.md), including the
+branch checkout, tool installation, and baseline checks. To run an already
+prepared checkout:
+
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -58,6 +66,7 @@ curl -H "x-member-id: M-10001" http://localhost:3000/api/prescriptions
 | `npm run dev:ui` | Frontend only |
 | `npm run build` | Compile backend + build frontend |
 | `npm test` | Run API tests |
+| `npm run typecheck` | Check backend TypeScript (not frontend TSX) |
 
 ## Project Structure
 
