@@ -2,6 +2,22 @@
 
 A lean healthcare member portal (Express API + React frontend) used as the base for lab exercises.
 
+## Spec-driven workshop
+
+The `spec-workshop` branch is an **unfinished learner starter**, not a completed
+solution. Start with the [workshop guide](workshops/README.md).
+
+- **Core:** one claims status-filter/pagination change, from Spec Kit specification
+  through implementation, testing, a custom reviewer agent, and human acceptance.
+  Designed for the 3-3.5-hour event; setup is prework.
+- **Optional:** [multiple custom agents](workshops/optional/custom-agents.md) and
+  [appeal eligibility and drafting](workshops/optional/claim-appeals.md).
+  Neither is required to complete the core workshop.
+- **Infrastructure:** local runtimes and development tools only. No Redis server,
+  database, Docker, GitHub Actions, paid cloud resources, or external healthcare APIs.
+
+Keep the existing `lab-guide` materials separate from this workshop.
+
 ## Quick Start
 
 ```bash
