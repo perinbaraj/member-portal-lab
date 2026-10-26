@@ -67,13 +67,6 @@ mean GitHub Actions, a parallel agent fleet, or unattended permission bypasses.
 
 ## Dependency boundary
 
-The app uses its existing Node.js dependencies and in-memory fixtures. Spec Kit is
-a local development tool, not an application service. Copilot needs the usual
-account access and network connectivity.
+The app uses its existing Node.js dependencies and in-memory fixtures. Spec Kit is a local development tool, not an application service. Copilot needs the usual account access and network connectivity.
 
-No path requires a Redis service, database, Docker, cloud deployment, MCP server,
-or CI workflow. The existing `ioredis` package is unused by these activities.
-Appeals are eligibility checks and drafts only: nothing is submitted or persisted.
-
-Use only the repository's synthetic fixtures. Do not paste real member data,
-health information, tokens, or credentials into prompts or workshop artifacts.
+Use only the repository's synthetic fixtures. Do not paste real member data, health information, tokens, or credentials into prompts or workshop artifacts.
