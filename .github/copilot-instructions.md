@@ -1,6 +1,6 @@
 # Copilot Instructions — Member Portal
 
-These instructions are for the entire member portal codebase, not just the workshop exercises.
+Ignore the /workshop directory exercises; these instructions apply to the entire member portal codebase.
 
 ## Project Context
 This is a full-stack healthcare member portal with a Node.js + Express BFF backend and a React 18 + TypeScript frontend. The portal handles member self-service operations: viewing prescriptions, requesting refills, checking claims, managing appointments, and prior authorizations.
